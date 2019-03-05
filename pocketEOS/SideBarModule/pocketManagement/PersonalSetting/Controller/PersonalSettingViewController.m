@@ -11,7 +11,7 @@
 #import "BindSocialPlatformViewController.h"
 #import "UnBindSocialPlatformViewController.h"
 #import "SliderVerifyView.h"
-#import "LoginMainViewController.h"
+#import "LoginEntranceViewController.h"
 #import "AppDelegate.h"
 #import "PersonalSettingService.h"
 #import "RSKImageCropper.h"
@@ -72,7 +72,7 @@
 
 - (NavigationView *)navView{
     if (!_navView) {
-        _navView = [NavigationView navigationViewWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, NAVIGATIONBAR_HEIGHT) LeftBtnImgName:@"back" title:NSLocalizedString(@"个人设置", nil)rightBtnTitleName:@"" delegate:self];
+        _navView = [NavigationView navigationViewWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, NAVIGATIONBAR_HEIGHT) LeftBtnImgName:@"back" title:NSLocalizedString(@"个人中心", nil)rightBtnTitleName:@"" delegate:self];
         _navView.leftBtn.lee_theme.LeeAddButtonImage(SOCIAL_MODE, [UIImage imageNamed:@"back"], UIControlStateNormal).LeeAddButtonImage(BLACKBOX_MODE, [UIImage imageNamed:@"back_white"], UIControlStateNormal);
     }
     return _navView;
@@ -82,7 +82,7 @@
     if (!_headerView) {
         _headerView = [[[NSBundle mainBundle] loadNibNamed:@"PersonalSettingHeaderView" owner:nil options:nil] firstObject];
         _headerView.delegate = self;
-        _headerView.frame = CGRectMake(0, NAVIGATIONBAR_HEIGHT, SCREEN_WIDTH, 250);
+        _headerView.frame = CGRectMake(0, NAVIGATIONBAR_HEIGHT, SCREEN_WIDTH, 250-56);
     }
     return _headerView;
 }
@@ -182,8 +182,9 @@
 
 -(void)nameBtnDidClick:(UIButton *)sender{
     PersonnalSettingDetailViewController *vc = [[PersonnalSettingDetailViewController alloc] init];
-    vc.titleStr = NSLocalizedString(@"名字", nil);
-    vc.itemName = NSLocalizedString(@"名字", nil);
+    vc.titleStr = NSLocalizedString(@"修改名字", nil);
+//    vc.itemName = NSLocalizedString(@"修改名字", nil);
+    
     [self.navigationController pushViewController:vc animated:YES];
     
 }
@@ -336,6 +337,10 @@
 // LoginPasswordViewDelegate
 -(void)cancleBtnDidClick:(UIButton *)sender{
     [self.loginPasswordView removeFromSuperview];
+    
+    [UIView animateWithDuration:1 animations:^{
+        [self.sliderVerifyView.orignalImg setCenter:CGPointMake(4 + 50/2 , 24 )];
+    }];
 }
 -(void)confirmBtnDidClick:(UIButton *)sender{
     // 验证密码输入是否正确
@@ -347,12 +352,15 @@
     
     [[WalletTableManager walletTable] deleteRecord:CURRENT_WALLET_UID];
     [[WalletTableManager walletTable] executeUpdate:[NSString stringWithFormat:@"DROP TABLE '%@'" , current_wallet.account_info_table_name]];
-
+    
+    [[NSUserDefaults standardUserDefaults] setObject: nil  forKey:Current_Account_name];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+    
     for (UIView *view in WINDOW.subviews) {
         [view removeFromSuperview];
         
     }
-    UINavigationController *navi = [[UINavigationController alloc] initWithRootViewController:[[LoginMainViewController alloc] init]];
+    UINavigationController *navi = [[UINavigationController alloc] initWithRootViewController:[[LoginEntranceViewController alloc] init]];
     [((AppDelegate *)[[UIApplication sharedApplication] delegate]).window setRootViewController: navi];
     
 }

@@ -8,10 +8,9 @@
 
 #import <UIKit/UIKit.h>
 #import "TokenInfo.h"
+#import "EOSResourceResult.h"
 
-@class Account;
 @interface AssestsMainHeaderView : UIView
-@property (weak, nonatomic) IBOutlet UILabel *userNameLabel;
 @property (weak, nonatomic) IBOutlet UILabel *userAccountLabel;
 @property (weak, nonatomic) IBOutlet UILabel *totalAssetsLabel;
 
@@ -25,8 +24,18 @@
 @property(nonatomic, copy) void(^accountBtnDidTapBlock)(void);
 @property(nonatomic, copy) void(^avatarImgDidTapBlock)(void);
 @property(nonatomic, copy) void(^addAssestsImgDidTapBlock)(void);
-@property(nonatomic, strong) Account *model;
 
 - (void)updateViewWithDataArray:(NSMutableArray<TokenInfo *> *)dataArray;
+
+- (void)updateViewWithEOSResourceResult:(EOSResourceResult *)model;
+
 @property(nonatomic , strong) NSMutableArray *tokenInfoDataArray;
+
+
+@property (weak, nonatomic) IBOutlet UIView *assestHeaderButtonsBackgroundView;
+
+
+@property (weak, nonatomic) IBOutlet UIImageView *shortageImageView;
+
+
 @end

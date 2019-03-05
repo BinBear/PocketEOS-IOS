@@ -5,16 +5,24 @@
 //  Created by oraclechain on 2017/11/27.
 //  Copyright © 2017年 oraclechain. All rights reserved.
 //
+#define YOUMENG_AppKey @"5b39ed6fb27b0a50be00012d"
 
 #import "AppDelegate.h"
 #import "BaseTabBarController.h"
-#import "LoginMainViewController.h"
+#import "LoginEntranceViewController.h"
+#import "LoginEntranceViewController.h"
 #import "BBLoginViewController.h"
 #import "WXApi.h"
 #import "SocialManager.h"
+#import "WXApiManager.h"
 #import <TencentOpenAPI/TencentOAuth.h>
 #import <TencentOpenAPI/QQApiInterface.h>
 #import "LEEBubble.h"
+#import <UMCommon/UMCommon.h>
+#import <UMCommonLog/UMCommonLogHeaders.h>
+#import <UMAnalytics/MobClick.h>
+#import <AlipaySDK/AlipaySDK.h>
+
 
 @interface AppDelegate ()<WXApiDelegate, QQApiInterfaceDelegate>
 
@@ -46,20 +54,17 @@ void uncaughtExceptionHandler(NSException*exception){
     [[SocialManager socialManager] initWithSocialSDK:application didFinishLaunchingWithOptions:launchOptions];
     
     Wallet *wallet = CURRENT_WALLET;
-    NSArray *accountArray = [[AccountsTableManager accountTable ] selectAccountTable];
-    if (accountArray.count > 0) {
+    
+    if (wallet) {
         
         // 如果本地有当前账号对应的钱包且有账号
         [self.window setRootViewController: rootVC];
         
     }else{
-        if (wallet) {
-            
-            [[WalletTableManager walletTable] deleteRecord:wallet.wallet_uid];            
-        }
+        
         UIViewController *vc;
         if (LEETHEME_CURRENTTHEME_IS_SOCAIL_MODE) {
-            vc = [[LoginMainViewController alloc] init];
+            vc = [[LoginEntranceViewController alloc] init];
         }else if (LEETHEME_CURRENTTHEME_IS_BLACKBOX_MODE){
             vc = [[BBLoginViewController alloc] init];
         }
@@ -70,8 +75,31 @@ void uncaughtExceptionHandler(NSException*exception){
     }
     NSURLCache *URLCache = [[NSURLCache alloc] initWithMemoryCapacity:4 * 1024 * 1024 diskCapacity:20 * 1024 * 1024 diskPath:nil];
     [NSURLCache setSharedURLCache:URLCache];
+    
+    [self integrateUMengSDK];
+
     return YES;
 }
+
+/*
+ 友盟
+ **/
+- (void)integrateUMengSDK{
+    [UMConfigure setEncryptEnabled:NO];//打开加密传输
+    
+#ifdef DEBUG
+    // Debug模式的代码...
+    [UMConfigure setLogEnabled:YES];//设置日志, 调试模式
+#else
+    // Release模式的代码...
+    [UMConfigure setLogEnabled:NO];//设置日志, 上线模式
+#endif
+    
+    [UMConfigure initWithAppkey:YOUMENG_AppKey channel:@"pgyer"];// pgyer ||   APP STORE
+    NSString* deviceID = [UMConfigure deviceIDForIntegration];
+    NSLog(@"集成测试的deviceID:%@",deviceID);
+}
+
 
 
 -(BOOL)application:(UIApplication *)application handleOpenURL:(NSURL *)url{
@@ -79,19 +107,83 @@ void uncaughtExceptionHandler(NSException*exception){
         return [WXApi handleOpenURL:url delegate:[SocialManager socialManager]];
     }else if ([SocialManager socialManager].socialType == kQQ){
         return [TencentOAuth HandleOpenURL:url];
+    }else if ([ThirdPayManager sharedManager].thirdPayType == kWechatPay){
+        return [WXApi handleOpenURL:url delegate:[ThirdPayManager sharedManager]];
     }
     return YES;
 }
 
+
+extern NSString *AlipayDidFinishNotification;
 -(BOOL)application:(UIApplication *)app openURL:(nonnull NSURL *)url sourceApplication:(nullable NSString *)sourceApplication annotation:(nonnull id)annotation{
     if ([SocialManager socialManager].socialType == kWechat) {
          return [WXApi handleOpenURL:url delegate:[SocialManager socialManager]];
     }else if ([SocialManager socialManager].socialType == kQQ){
         [QQApiInterface handleOpenURL:url delegate:[SocialManager socialManager]];
         return [TencentOAuth HandleOpenURL:url];
+    }else if ([ThirdPayManager sharedManager].thirdPayType == kWechatPay){
+        return [WXApi handleOpenURL:url delegate:[ThirdPayManager sharedManager]];
+    }else if ([url.host isEqualToString:@"safepay"]){
+        // 支付跳转支付宝钱包进行支付，处理支付结果
+        [[AlipaySDK defaultService] processOrderWithPaymentResult:url standbyCallback:^(NSDictionary *resultDic) {
+//            NSLog(@"result = %@",resultDic);
+            [[NSNotificationCenter defaultCenter] postNotificationName:AlipayDidFinishNotification object:resultDic];
+            
+        }];
+        
+        // 授权跳转支付宝钱包进行支付，处理支付结果
+        [[AlipaySDK defaultService] processAuth_V2Result:url standbyCallback:^(NSDictionary *resultDic) {
+            NSLog(@"result = %@",resultDic);
+            // 解析 auth code
+            NSString *result = resultDic[@"result"];
+            NSString *authCode = nil;
+            if (result.length>0) {
+                NSArray *resultArr = [result componentsSeparatedByString:@"&"];
+                for (NSString *subResult in resultArr) {
+                    if (subResult.length > 10 && [subResult hasPrefix:@"auth_code="]) {
+                        authCode = [subResult substringFromIndex:10];
+                        break;
+                    }
+                }
+            }
+            NSLog(@"授权结果 authCode = %@", authCode?:@"");
+        }];
     }
+    
     return YES;
 }
+
+
+// NOTE: 9.0以后使用新API接口
+//- (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<NSString*, id> *)options
+//{
+//    if ([url.host isEqualToString:@"safepay"]) {
+//        // 支付跳转支付宝钱包进行支付，处理支付结果
+//        [[AlipaySDK defaultService] processOrderWithPaymentResult:url standbyCallback:^(NSDictionary *resultDic) {
+//            NSLog(@"result = %@",resultDic);
+//        }];
+//
+//        // 授权跳转支付宝钱包进行支付，处理支付结果
+//        [[AlipaySDK defaultService] processAuth_V2Result:url standbyCallback:^(NSDictionary *resultDic) {
+//            NSLog(@"result = %@",resultDic);
+//            // 解析 auth code
+//            NSString *result = resultDic[@"result"];
+//            NSString *authCode = nil;
+//            if (result.length>0) {
+//                NSArray *resultArr = [result componentsSeparatedByString:@"&"];
+//                for (NSString *subResult in resultArr) {
+//                    if (subResult.length > 10 && [subResult hasPrefix:@"auth_code="]) {
+//                        authCode = [subResult substringFromIndex:10];
+//                        break;
+//                    }
+//                }
+//            }
+//            NSLog(@"授权结果 authCode = %@", authCode?:@"");
+//        }];
+//    }
+//    return YES;
+//}
+
 
 #pragma mark - 设置主题
 
@@ -193,6 +285,9 @@ void uncaughtExceptionHandler(NSException*exception){
         
     };
 }
+
+
+
 - (void)applicationWillResignActive:(UIApplication *)application {
     
 }

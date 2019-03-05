@@ -16,10 +16,26 @@
  */
 #define CURRENT_WALLET [[[WalletTableManager walletTable] selectCurrentWallet] firstObject];
 
+#define CURRENT_WALLET_HAS_SET_PASSWORD [[WalletTableManager walletTable] walletPasswordHasSet]
+
 /**
  当前 wallet_uid
  */
 #define CURRENT_WALLET_UID [[NSUserDefaults standardUserDefaults] objectForKey:Current_wallet_uid]
+
+/**
+ 当前 账号名
+ */
+#define CURRENT_ACCOUNT_NAME [[NSUserDefaults standardUserDefaults] objectForKey:Current_Account_name]
+
+#define CURRENT_AccountTable_HAS_Account [[AccountsTableManager accountTable] accountsTableHasAccount]
+
+/**
+ 当前 token_info_array
+ */
+#define CURRENT_TOKEN_INFO_ARRAY [ArchiveUtil unarchiveTokenInfoArray]
+
+#define LOCAL_CURRENT_TOKEN_INFO_ARRAY_FILENAME @"token_info_serviceDataSourceArray.archive"
 
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -50,6 +66,13 @@
 
 // 轮播图高度
 #define CYCLESCROLLVIEW_HEIGHT ([UIScreen mainScreen].bounds.size.width * 0.4)
+#define DISCOVER_CYCLESCROLLVIEW_HEIGHT (([UIScreen mainScreen].bounds.size.width - 40) * 0.45)
+
+
+#define DISCOVER_BANNER_HEIGHT DISCOVER_CYCLESCROLLVIEW_HEIGHT + MARGIN_20 + MARGIN_15 + 18 + 8 + 13 + 10
+#define RECOMMEN_Dapps_BaseVIEW_HEIGHT 210.0f
+#define STAR_Dapp_BaseVIEW_HEIGHT 100.0f
+
 #define MENUSCROLLVIEW_HEIGHT 40.0f
 #define MENUSCROLLVIEW_BOTTOM_LINE_HEIGHT 1.5f
 #define MENUSCROLLVIEW_ITEM_WIDTH 50.0f

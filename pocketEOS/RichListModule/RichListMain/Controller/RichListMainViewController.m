@@ -70,6 +70,13 @@
         self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
     }
     [self buildDataSource];
+    [MobClick beginLogPageView:@"富豪榜"]; //("Pagename"为页面名称，可自定义)
+}
+
+- (void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    [MobClick endLogPageView:@"富豪榜"];
 }
 
 - (void)viewDidLoad {
@@ -140,7 +147,7 @@
     return self.mainService.keysArray.count;
 }
 
--(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{\
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
     
     RichListCell *cell = [tableView dequeueReusableCellWithIdentifier:CELL_REUSEIDENTIFIER];
     if (!cell) {
@@ -197,6 +204,7 @@
         return 0;
     }
 }
+
 -(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section{
     if (self.mainService.keysArray.count > 0) {
         
@@ -246,7 +254,7 @@
             GetAccount *model = [GetAccount mj_objectWithKeyValues:result.data];
             RichlistDetailViewController *vc = [[RichlistDetailViewController alloc] init];
             Follow *follow = [[Follow alloc] init];
-            follow.displayName = model.account_name;
+            follow.displayName = VALIDATE_STRING(searchText);
             follow.followType = @2;
             [self.searchNavigationController dismissViewControllerAnimated:NO completion:nil];
             vc.model = follow;

@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface TokenInfo : NSObject
+@interface TokenInfo : OptionModel<NSCoding>
 
 /**
  contract_name
@@ -71,5 +71,7 @@
  asset_market_cap_cny
  */
 @property(nonatomic, copy) NSString *asset_market_cap_cny;
+
+@property(nonatomic , assign) BOOL isRedpacket;
 
 @end

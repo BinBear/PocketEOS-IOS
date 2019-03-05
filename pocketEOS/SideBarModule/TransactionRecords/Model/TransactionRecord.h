@@ -46,7 +46,6 @@
  */
 @property(nonatomic, copy) NSString *memo;
 
-
 /**
  过期时间
  */
@@ -55,6 +54,16 @@
 /**
  ref_block_num
  */
-@property(nonatomic, copy) NSString *ref_block_num;
+@property(nonatomic, strong) NSNumber *blockNum;
 
+@property(nonatomic, copy) NSString *time;
+
+@property(nonatomic , copy) NSString *trxid;
+
+@property(nonatomic , copy) NSString *cpu_usage_us;
+
+@property(nonatomic , copy) NSString *net_usage_words;
+
+// 合约
+@property(nonatomic , copy) NSString *contract;
 @end

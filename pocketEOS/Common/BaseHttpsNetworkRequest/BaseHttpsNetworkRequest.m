@@ -14,17 +14,8 @@
 #import "AppDelegate.h"
 #import "SVProgressHUD.h"
 
-// release 环境
-#define REQUEST_BASEURL @"https://api.pocketeos.top"
 
-// 生产环境
-//#define REQUEST_BASEURL @"http://47.105.50.198"
 
-// 测试环境
-//#define REQUEST_BASEURL @"http://59.110.162.106:8080"
-
-// 测试环境/lian
-//#define REQUEST_BASEURL @"http://192.168.3.205:8888"
 
 // java interface
 #define REQUEST_APIPATH [NSString stringWithFormat: @"/api_oc_blockchain-v1.3.0%@", [self requestUrlPath]]
@@ -124,6 +115,21 @@
 #pragma mark -- 单向验证 :: 下面还有一处请求需要改单项验证
     [self.networkingManager setSecurityPolicy:[self customSecurityPolicy]];
     
+    [self.networkingManager.requestSerializer setValue:@"ios" forHTTPHeaderField:@"system_version"];
+    
+    if (LEETHEME_CURRENTTHEME_IS_SOCAIL_MODE) {
+        [self.networkingManager.requestSerializer setValue:CURRENT_WALLET_UID forHTTPHeaderField:@"uid"];
+        
+    }else if(LEETHEME_CURRENTTHEME_IS_BLACKBOX_MODE){
+        [self.networkingManager.requestSerializer setValue:@"6f1a8e0eb24afb7ddc829f96f9f74e9d" forHTTPHeaderField:@"uid"];
+    }
+    
+    if ([NSBundle isChineseLanguage]) {
+        [self.networkingManager.requestSerializer setValue:@"chinese" forHTTPHeaderField:@"language"];
+    }else{
+        [self.networkingManager.requestSerializer setValue:@"english" forHTTPHeaderField:@"language"];
+    }
+    
     //客服端利用p12验证服务器 , 双向验证
 //    [self checkCredential:self.networkingManager];
     self.networkingManager.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"application/json", @"text/html",@"text/json", @"text/javascript", @"text/plain", nil];
@@ -187,6 +193,7 @@
             if(IsNilOrNull(success)){
                 return;
             }
+            NSLog(@"responseObject%@", responseObject);
             success(weakSelf.networkingManager, responseObject);
         }
         else{
@@ -231,8 +238,23 @@
     manager.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"application/json", @"text/html",@"text/json", @"text/javascript", @"text/plain", nil];
     // request Json 序列化
     manager.requestSerializer=[AFJSONRequestSerializer serializer];
+    
+    if (LEETHEME_CURRENTTHEME_IS_SOCAIL_MODE) {
+        [manager.requestSerializer setValue:CURRENT_WALLET_UID forHTTPHeaderField:@"uid"];
+        
+    }else if(LEETHEME_CURRENTTHEME_IS_BLACKBOX_MODE){
+        [manager.requestSerializer setValue:@"6f1a8e0eb24afb7ddc829f96f9f74e9d" forHTTPHeaderField:@"uid"];
+    }
+    
+    if ([NSBundle isChineseLanguage]) {
+        [manager.requestSerializer setValue:@"chinese" forHTTPHeaderField:@"language"];
+    }else{
+        [manager.requestSerializer setValue:@"english" forHTTPHeaderField:@"language"];
+    }
+    
     [manager POST:REQUEST_APIPATH parameters:parameters progress:^(NSProgress * _Nonnull uploadProgress) {
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+        
         if ([self validateResponseData:responseObject HttpURLResponse:task.response]) {
             if (IsNilOrNull(success)) {
                 return ;
@@ -240,7 +262,7 @@
             if ([responseObject isKindOfClass:[NSData class]]) {
                 
             }
-            
+            NSLog(@"responseObject%@", responseObject);
             success(weakSelf.networkingManager, responseObject);
         }
         [SVProgressHUD dismiss];

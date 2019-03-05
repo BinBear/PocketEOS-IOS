@@ -12,6 +12,13 @@
 
 
 /**
+ SymbolName
+ */
+#define SymbolName_EOS @"EOS"
+#define SymbolName_OCT @"OCT"
+#define SymbolName_CET @"CET"
+
+/**
  SmartContractName
  */
 #define ContractName_EOSIOTOKEN @"eosio.token"
@@ -19,6 +26,7 @@
 #define ContractName_OCTOTHEMOON @"octtothemoon"
 #define ContractName_HELLOWORLDGO @"helloworldgo"
 #define ContractName_OCASKANS @"ocaskans"
+#define ContractName_EOSIOCHAINCE @"eosiochaince"
 
 
 /**
@@ -33,6 +41,7 @@
 #define ContractAction_APPROVE @"approve"
 #define ContractAction_ASK @"ask"
 #define ContractAction_ANSWER @"answer"
+#define ContractAction_UPDATEAUTH @"updateauth"
 
 //投票前需要将自己注册到投票系统
 #define ContractAction_REGPROXY @"regproxy"

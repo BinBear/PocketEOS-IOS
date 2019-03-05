@@ -85,11 +85,18 @@ typedef NS_ENUM(NSInteger, AddAssestsViewControllerCurrentAction) {
     return _searchSuggestiontTabelView;
 }
 
-
--(void)viewWillAppear:(BOOL)animated{
+- (void)viewWillAppear:(BOOL)animated
+{
     [super viewWillAppear:animated];
-     self.mainService.get_recommand_token_request.accountName = self.accountName;
+    self.mainService.get_recommand_token_request.accountName = self.accountName;
     [self loadNewData];
+    [MobClick beginLogPageView:@"添加资产"]; //("Pagename"为页面名称，可自定义)
+}
+
+- (void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    [MobClick endLogPageView:@"添加资产"];
 }
 
 - (void)viewDidLoad {
@@ -116,15 +123,20 @@ typedef NS_ENUM(NSInteger, AddAssestsViewControllerCurrentAction) {
     [cell setAssestsSwitchStatusDidChangeBlock:^(RecommandToken *token, UISwitch *assestsSwitch) {
         NSLog(@"%@, %d", token.assetName, assestsSwitch.isOn);
         NSLog(@"%@", weakSelf.mainService.followAssetIdsDataArray);
-        if (assestsSwitch.isOn) {
-            if (![weakSelf.mainService.followAssetIdsDataArray containsObject: @(token.recommandToken_ID.integerValue)]) {
-                
-                [weakSelf.mainService.followAssetIdsDataArray addObject:@(token.recommandToken_ID.integerValue)];
-            }
+        if ([token.assetName isEqualToString:@"OCT"] || [token.assetName isEqualToString:@"EOS"]) {
+            [TOASTVIEW showWithText: NSLocalizedString(@"该资产无法取消关注", nil)];
         }else{
-            if ([weakSelf.mainService.followAssetIdsDataArray containsObject:@(token.recommandToken_ID.integerValue)]) {
-                [weakSelf.mainService.followAssetIdsDataArray removeObject:@(token.recommandToken_ID.integerValue)];
+            if (assestsSwitch.isOn) {
+                if (![weakSelf.mainService.followAssetIdsDataArray containsObject: @(token.recommandToken_ID.integerValue)]) {
+                    
+                    [weakSelf.mainService.followAssetIdsDataArray addObject:@(token.recommandToken_ID.integerValue)];
+                }
+            }else{
+                if ([weakSelf.mainService.followAssetIdsDataArray containsObject:@(token.recommandToken_ID.integerValue)]) {
+                    [weakSelf.mainService.followAssetIdsDataArray removeObject:@(token.recommandToken_ID.integerValue)];
+                }
             }
+            
         }
         
     }];
@@ -145,6 +157,15 @@ typedef NS_ENUM(NSInteger, AddAssestsViewControllerCurrentAction) {
 }
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+    RecommandToken *model;
+    if (self.addAssestsViewControllerCurrentAction == AddAssestsViewControllerActionSearchAssests) {
+        model = self.mainService.searchTokenResultDataArray[indexPath.row];
+    }else{
+        model = self.mainService.dataSourceArray[indexPath.row];
+    }
+    if ([model.assetName isEqualToString:@"OCT"] || [model.assetName isEqualToString:@"EOS"]) {
+        [TOASTVIEW showWithText: NSLocalizedString(@"该资产无法取消关注", nil)];
+    }
 }
 
 //AddAssestsHeaderViewDelegate
@@ -214,6 +235,11 @@ typedef NS_ENUM(NSInteger, AddAssestsViewControllerCurrentAction) {
     self.mainService.search_token_request.key = VALIDATE_STRING(searchText);
     [self.mainService search_token:^(id service, BOOL isSuccess) {
         if (isSuccess) {
+            if (self.mainService.searchTokenResultDataArray.count == 0) {
+                [IMAGE_TIP_LABEL_MANAGER showImageAddTipLabelViewWithSocial_Mode_ImageName:@"nomoredata" andBlackbox_Mode_ImageName:@"nomoredata_BB" andTitleStr:NSLocalizedString(@"暂无数据", nil)toView:weakSelf.searchSuggestiontTabelView andViewController:weakSelf];
+            }else{
+                [IMAGE_TIP_LABEL_MANAGER removeImageAndTipLabelViewManager];
+            }
             [weakSelf.searchSuggestiontTabelView reloadData];
         }
     }];

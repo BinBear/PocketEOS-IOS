@@ -15,15 +15,19 @@
 #import "SliderVerifyView.h"
 #import "AskQuestionTipView.h"
 #import "AppDelegate.h"
-#import "LoginMainViewController.h"
-#import "SocialSharePanelView.h"
-#import "SocialManager.h"
-#import "SocialShareModel.h"
+#import "LoginEntranceViewController.h"
 #import "AccountManagementService.h"
 #import "EOSResourceManageViewController.h"
 #import "UnStakeEOSViewController.h"
+#import "GetAccountResult.h"
+#import "GetAccount.h"
+#import "Permission.h"
+#import "CommonDialogHasPasswordTFView.h"
+#import "Get_account_permission_service.h"
+#import "ImportAccountPermisionViewController.h"
+#import "ResetAccountPermisionViewController.h"
 
-@interface AccountManagementViewController ()<UIGestureRecognizerDelegate,  NavigationViewDelegate, ExportPrivateKeyViewDelegate, SliderVerifyViewDelegate, LoginPasswordViewDelegate, AskQuestionTipViewDelegate, SocialSharePanelViewDelegate>
+@interface AccountManagementViewController ()<UIGestureRecognizerDelegate,  NavigationViewDelegate, ExportPrivateKeyViewDelegate, SliderVerifyViewDelegate, LoginPasswordViewDelegate, AskQuestionTipViewDelegate, AccountManagementHeaderViewDelegate, CommonDialogHasPasswordTFViewDelegate>
 @property(nonatomic , strong) AccountManagementService *mainService;
 @property(nonatomic, strong) AccountManagementHeaderView *headerView;
 @property(nonatomic , strong) UIView *footerView;
@@ -36,10 +40,9 @@
 // export privateKey and delete account action need mark off
 @property(nonatomic, copy) NSString *currentAction;
 @property(nonatomic, strong) AskQuestionTipView *askQuestionTipView;
-@property(nonatomic , strong) UIView *shareBaseView;
-@property(nonatomic , strong) SocialSharePanelView *socialSharePanelView;
-@property(nonatomic , strong) NSArray *platformNameArr;
 @property(nonatomic, strong) AccountPravicyProtectionRequest *accountPravicyProtectionRequest;
+@property(nonatomic , strong) CommonDialogHasPasswordTFView *commonDialogHasPasswordTFView;
+@property(nonatomic , strong) Get_account_permission_service *get_account_permission_service;
 @end
 
 @implementation AccountManagementViewController
@@ -50,9 +53,10 @@
     }
     return _mainService;
 }
+
 - (NavigationView *)navView{
     if (!_navView) {
-        _navView = [NavigationView navigationViewWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, NAVIGATIONBAR_HEIGHT) LeftBtnImgName:@"back" title:@"" rightBtnImgName:@"share" delegate:self];
+        _navView = [NavigationView navigationViewWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, NAVIGATIONBAR_HEIGHT) LeftBtnImgName:@"back" title:@"" rightBtnImgName:nil delegate:self];
         _navView.leftBtn.lee_theme.LeeAddButtonImage(SOCIAL_MODE, [UIImage imageNamed:@"back"], UIControlStateNormal).LeeAddButtonImage(BLACKBOX_MODE, [UIImage imageNamed:@"back_white"], UIControlStateNormal);
         if (LEETHEME_CURRENTTHEME_IS_BLACKBOX_MODE) {
             _navView.rightBtn.hidden = YES;
@@ -60,13 +64,16 @@
     }
     return _navView;
 }
+
 - (AccountManagementHeaderView *)headerView{
     if (!_headerView) {
         _headerView = [[[NSBundle mainBundle] loadNibNamed:@"AccountManagementHeaderView" owner:nil options:nil] firstObject];
         _headerView.frame = CGRectMake(0, NAVIGATIONBAR_HEIGHT, SCREEN_WIDTH, 245);
+        _headerView.delegate = self;
     }
     return _headerView;
 }
+
 - (UIView *)footerView{
     if (!_footerView) {
         _footerView = [[UIView alloc] init];
@@ -137,69 +144,6 @@
     return _askQuestionTipView;
 }
 
-- (SocialSharePanelView *)socialSharePanelView{
-    if (!_socialSharePanelView) {
-        _socialSharePanelView = [[SocialSharePanelView alloc] init];
-        _socialSharePanelView.backgroundColor = HEXCOLOR(0xF7F7F7);
-        _socialSharePanelView.delegate = self;
-        NSMutableArray *modelArr = [NSMutableArray array];
-        NSArray *titleArr = @[NSLocalizedString(@"微信好友", nil),NSLocalizedString(@"朋友圈", nil), NSLocalizedString(@"QQ好友", nil), NSLocalizedString(@"QQ空间", nil)];
-        for (int i = 0; i < 4; i++) {
-            SocialShareModel *model = [[SocialShareModel alloc] init];
-            model.platformName = titleArr[i];
-            model.platformImage = self.platformNameArr[i];
-            [modelArr addObject:model];
-        }
-        self.socialSharePanelView.imageTopSpace = 15;
-        [_socialSharePanelView updateViewWithArray:modelArr];
-    }
-    return _socialSharePanelView;
-}
-
-- (NSArray *)platformNameArr{
-    if (!_platformNameArr) {
-        _platformNameArr = @[@"wechat_friends",@"wechat_moments", @"qq_friends", @"qq_Zone"];
-    }
-    return _platformNameArr;
-}
-
-- (UIView *)shareBaseView{
-    if (!_shareBaseView) {
-        _shareBaseView = [[UIView alloc] init];
-        _shareBaseView.userInteractionEnabled = YES;
-        
-        UIView *topView = [[UIView alloc] init];
-        topView.backgroundColor = [UIColor blackColor];
-        topView.alpha = 0.5;
-        topView.userInteractionEnabled = YES;
-        [_shareBaseView addSubview:topView];
-        topView.sd_layout.leftSpaceToView(_shareBaseView, 0).rightSpaceToView(_shareBaseView, 0).topSpaceToView(_shareBaseView, 0).heightIs(SCREEN_HEIGHT - 47 - 100 - 50);
-        
-        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(dismiss)];
-        [topView addGestureRecognizer:tap];
-        
-        UIButton *cancleBtn = [[UIButton alloc] init];
-        [cancleBtn setTitle:NSLocalizedString(@"取消", nil)forState:(UIControlStateNormal)];
-        [cancleBtn setBackgroundColor:HEXCOLOR(0xF7F7F7)];
-        [cancleBtn setTitleColor:HEXCOLOR(0x2A2A2A) forState:(UIControlStateNormal)];
-        [cancleBtn addTarget:self action:@selector(cancleShareAccountDetail) forControlEvents:(UIControlEventTouchUpInside)];
-        [_shareBaseView addSubview:cancleBtn];
-        cancleBtn.sd_layout.leftSpaceToView(_shareBaseView ,0 ).rightSpaceToView(_shareBaseView, 0).bottomSpaceToView(_shareBaseView, 0).heightIs(47);
-        
-        [_shareBaseView addSubview:self.socialSharePanelView];
-        _socialSharePanelView.sd_layout.leftSpaceToView(_shareBaseView, 0).rightSpaceToView(_shareBaseView, 0).bottomSpaceToView(cancleBtn, 0).heightIs(100);
-        
-        UILabel *label = [[UILabel alloc] init];
-        label.text = NSLocalizedString(@"    将二维码分享到", nil);
-        label.font = [UIFont systemFontOfSize:14];
-        label.textColor = HEXCOLOR(0x2A2A2A);
-        [label setBackgroundColor:HEXCOLOR(0xF7F7F7)];
-        [_shareBaseView addSubview: label];
-        label.sd_layout.leftSpaceToView(_shareBaseView, 0).rightSpaceToView(_shareBaseView, 0).bottomSpaceToView(_socialSharePanelView, 0).heightIs(50);
-    }
-    return _shareBaseView;
-}
-
 - (AccountPravicyProtectionRequest *)accountPravicyProtectionRequest{
     if (!_accountPravicyProtectionRequest) {
         _accountPravicyProtectionRequest = [[AccountPravicyProtectionRequest alloc] init];
@@ -207,6 +151,36 @@
     return _accountPravicyProtectionRequest;
 }
 
+- (CommonDialogHasPasswordTFView *)commonDialogHasPasswordTFView{
+    if (!_commonDialogHasPasswordTFView) {
+        _commonDialogHasPasswordTFView = [[CommonDialogHasPasswordTFView alloc] initWithFrame:(CGRectMake(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT))];
+        _commonDialogHasPasswordTFView.delegate = self;
+        _commonDialogHasPasswordTFView.titleLabel.textColor = HEXCOLOR(0xFF3D3D);
+        _commonDialogHasPasswordTFView.titleLabel.font = [UIFont boldSystemFontOfSize:17];
+    }
+    return _commonDialogHasPasswordTFView;
+}
+
+
+- (Get_account_permission_service *)get_account_permission_service{
+    if (!_get_account_permission_service) {
+        _get_account_permission_service = [[Get_account_permission_service alloc] init];
+    }
+    return _get_account_permission_service;
+}
+
+
+-(void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    [self configHeaderView];
+    [MobClick beginLogPageView:@"钱包管理_账号详情"];
+}
+
+-(void)viewWillDisappear:(BOOL)animated{
+    [super viewWillDisappear:animated];
+    [MobClick endLogPageView:@"钱包管理_账号详情"];
+    
+}
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -223,19 +197,27 @@
     [self.mainService buildDataSource:^(id service, BOOL isSuccess) {
         [self.mainTableView reloadData];
     }];
-   
-    NSMutableDictionary *dic = [NSMutableDictionary dictionary];
-    [dic setObject:VALIDATE_STRING(self.model.account_name)  forKey:@"account_name"];
-    [dic setObject:VALIDATE_STRING(self.model.account_img)  forKey:@"account_img"];
-    [dic setObject: @"account_QRCode" forKey:@"type"];
-    //帐号二维码
-    NSString *QRCodeJsonStr = [dic mj_JSONString];
-    self.headerView.QRCodeImg.image  = [SGQRCodeGenerateManager generateWithLogoQRCodeData:QRCodeJsonStr logoImageName:@"account_default_blue" logoScaleToSuperView:0.2];
     
-    
-    AccountInfo *model = [[AccountsTableManager accountTable] selectAccountTableWithAccountName: self.model.account_name];
-    self.model = model;
     self.navView.titleLabel.text = self.model.account_name;
+    
+    
+}
+
+- (void)requestRemoteAccountInfo{
+    WS(weakSelf);
+    self.get_account_permission_service.getAccountRequest.name = VALIDATE_STRING(self.model.account_name) ;
+    [self.get_account_permission_service getAccountPermission:^(Get_account_permission_service *service, BOOL isSuccess) {
+        if (isSuccess) {
+            [weakSelf.headerView updateViewWithGet_account_permission_service:service];
+        }
+    }];
+}
+
+- (void)configHeaderView{
+    AccountInfo *localAccount = [[AccountsTableManager accountTable] selectAccountTableWithAccountName: self.model.account_name];
+    self.model = localAccount;
+    self.headerView.localAccount = localAccount;
+    [self requestRemoteAccountInfo];
 }
 
 //UITableViewDelegate , UITableViewDataSource
@@ -290,12 +272,14 @@
     }else if([str isEqualToString:NSLocalizedString(@"保护隐私", nil)]){
         NSLog(@"保护隐私");
     }else if([str isEqualToString:NSLocalizedString(@"EOS资源管理", nil)]){
+        [MobClick event:@"钱包管理_账号详情_资源管理"];
         EOSResourceManageViewController *vc = [[EOSResourceManageViewController alloc] init];
         vc.currentAccountName = self.model.account_name;
         [self.navigationController pushViewController:vc animated:YES];
     }else if([str isEqualToString:NSLocalizedString(@"导出私钥", nil)]){
         [self exportPrivateKeyBtnDidClick:nil];
     }else if([str isEqualToString:NSLocalizedString(@"EOS一键赎回", nil)]){
+        [MobClick event:@"钱包管理_账号详情_一键赎回"];
         [self unStakeBtnClick];
     }
 }
@@ -371,6 +355,9 @@
 // loginPasswordViewDelegate
 - (void)cancleBtnDidClick:(UIButton *)sender{
     [self removePasswordView];
+    [UIView animateWithDuration:1 animations:^{
+        [self.sliderVerifyView.orignalImg setCenter:CGPointMake(4 + 50/2 , 24 )];
+    }];
     self.currentAction = nil;
 }
 
@@ -390,47 +377,7 @@
         self.exportPrivateKeyView.contentTextView.text = privateKeyStr;
         [self.loginPasswordView removeFromSuperview];
     }else if ([self.currentAction isEqualToString:@"DeleteAccount"]){
-        // 删除账号
-        NSArray *accountArr = [[AccountsTableManager accountTable] selectAccountTable];
-        if (accountArr.count > 1) {
-            BOOL result = [[AccountsTableManager accountTable] executeUpdate: [NSString stringWithFormat:@"DELETE FROM '%@' WHERE account_name = '%@'", current_wallet.account_info_table_name,self.model.account_name]];
-            // 再默认设置一个主账号
-            NSMutableArray *newAccountsArr = [[AccountsTableManager accountTable] selectAccountTable];
-            AccountInfo *model = newAccountsArr[0];
-            //  通知服务器
-            self.setMainAccountRequest.uid = CURRENT_WALLET_UID;
-            self.setMainAccountRequest.eosAccountName = model.account_name;
-            [self.setMainAccountRequest postDataSuccess:^(id DAO, id data) {
-                BaseResult *result = [BaseResult mj_objectWithKeyValues:data];
-                if ([result.code isEqualToNumber:@0]) {
-                    // 1.将所有的账号都设为 非主账号
-                    Wallet *wallet = CURRENT_WALLET;
-                    [[AccountsTableManager accountTable] executeUpdate:[NSString stringWithFormat:@"UPDATE '%@' SET is_main_account = '0' ", wallet.account_info_table_name]];
-                    
-                    // update account table
-                    BOOL result = [[AccountsTableManager accountTable] executeUpdate:[NSString stringWithFormat: @"UPDATE '%@' SET is_main_account = '1'  WHERE account_name = '%@'", wallet.account_info_table_name, model.account_name ]];
-                    
-                    // update wallet table
-                    [[WalletTableManager walletTable] executeUpdate:[NSString stringWithFormat:@"UPDATE '%@' SET wallet_main_account = '%@' WHERE wallet_uid = '%@'" , WALLET_TABLE , model.account_name, CURRENT_WALLET_UID]];
-                    NSLog(@"设置主账号成功");
-                }else{
-                    [TOASTVIEW showWithText:result.message];
-                }
-                
-            } failure:^(id DAO, NSError *error) {
-                    
-            }];
-            
-                
-            if (result) {
-                [TOASTVIEW showWithText:NSLocalizedString(@"删除账号成功!", nil)];
-                [self.navigationController popViewControllerAnimated:YES];
-            }
-        }else{ 
-             [self.view addSubview:self.askQuestionTipView];
-             self.askQuestionTipView.titleLabel.text = NSLocalizedString(@"检测到您钱包下只有一个账号,继续将执行注销钱包操作!请谨慎~", nil);
-            
-        }
+     
         self.loginPasswordView.inputPasswordTF.text = nil;
     }
 }
@@ -438,6 +385,7 @@
 // AskQuestionTipViewDelegate
 - (void)askQuestionTipViewCancleBtnDidClick:(UIButton *)sender{
     [self.askQuestionTipView removeFromSuperview];
+    [self removeCommonDialogHasPasswordTFView];
 }
 
 - (void)askQuestionTipViewConfirmBtnDidClick:(UIButton *)sender{
@@ -446,11 +394,17 @@
     [[WalletTableManager walletTable] deleteRecord:CURRENT_WALLET_UID];
     [[WalletTableManager walletTable] executeUpdate:[NSString stringWithFormat:@"DROP TABLE '%@'" , current_wallet.account_info_table_name]];
     
+    [[NSUserDefaults standardUserDefaults] setObject: nil  forKey:Current_wallet_uid];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+    
+    [[NSUserDefaults standardUserDefaults] setObject: nil  forKey:Current_Account_name];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+    
     for (UIView *view in WINDOW.subviews) {
         [view removeFromSuperview];
         
     }
-    UINavigationController *navi = [[UINavigationController alloc] initWithRootViewController:[[LoginMainViewController alloc] init]];
+    UINavigationController *navi = [[UINavigationController alloc] initWithRootViewController:[[LoginEntranceViewController alloc] init]];
     [((AppDelegate *)[[UIApplication sharedApplication] delegate]).window setRootViewController: navi];
 }
 
@@ -458,7 +412,7 @@
 // SliderVerifyViewDelegate
 - (void)sliderVerifyDidSuccess{
     self.currentAction = @"DeleteAccount";
-    [self.view addSubview:self.loginPasswordView];
+    [self addCommonDialogHasPasswordView];
 }
 
 //ExportPrivateKeyViewDelegate
@@ -470,8 +424,29 @@
     [params setObject: VALIDATE_STRING([AESCrypt decrypt:model.account_owner_private_key password:self.loginPasswordView.inputPasswordTF.text])  forKey:@"owner_private_key"];
     [params setObject:@"account_priviate_key_QRCode" forKey:@"type"];
     NSString *jsonStr = [params mj_JSONString];
+    
     self.exportPrivateKeyView.QRCodeimg.image = [SGQRCodeGenerateManager generateWithLogoQRCodeData:jsonStr logoImageName:@"account_default_blue" logoScaleToSuperView:0.2];
+    
+
 }
+
+- (void)copyOwnerPrivateKeyBtnDidClick{
+    AccountInfo *model = [[AccountsTableManager accountTable] selectAccountTableWithAccountName: self.model.account_name];
+    NSString *ownerPrivateKey = VALIDATE_STRING([AESCrypt decrypt:model.account_owner_private_key password:self.loginPasswordView.inputPasswordTF.text]);
+    UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
+    pasteboard.string = ownerPrivateKey;
+    [TOASTVIEW showWithText:NSLocalizedString(@"复制成功", nil)];
+    
+}
+
+- (void)copyActivePrivateKeyBtnDidClick{
+    AccountInfo *model = [[AccountsTableManager accountTable] selectAccountTableWithAccountName: self.model.account_name];
+    NSString *ownerPrivateKey = VALIDATE_STRING([AESCrypt decrypt:model.account_active_private_key password:self.loginPasswordView.inputPasswordTF.text]);
+    UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
+    pasteboard.string = ownerPrivateKey;
+    [TOASTVIEW showWithText:NSLocalizedString(@"复制成功", nil)];
+}
+
 
 - (void)copyBtnDidClick:(UIButton *)sender{
     UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
@@ -483,37 +458,124 @@
     [self.navigationController popViewControllerAnimated:YES];
 }
 
-- (void)rightBtnDidClick{
-    [self.view addSubview:self.shareBaseView];
-    self.shareBaseView.sd_layout.leftSpaceToView(self.view, 0).rightSpaceToView(self.view, 0).bottomSpaceToView(self.view, 0).heightIs(SCREEN_HEIGHT);
-}
-// SocialSharePanelViewDelegate
-- (void)SocialSharePanelViewDidTap:(UITapGestureRecognizer *)sender{
-    NSString *platformName = self.platformNameArr[sender.view.tag-1000];
-    NSLog(@"%@", platformName);
-    
-    if ([platformName isEqualToString:@"wechat_friends"]) {
-        [[SocialManager socialManager] wechatShareImageToScene:0 withImage:[UIImage convertViewToImage:self.headerView.QRCodeImg]];
-    }else if ([platformName isEqualToString:@"wechat_moments"]){
-        [[SocialManager socialManager] wechatShareImageToScene:1 withImage:[UIImage convertViewToImage:self.headerView.QRCodeImg]];
-    }else if ([platformName isEqualToString:@"qq_friends"]){
-        [[SocialManager socialManager] qqShareToScene:0 withShareImage:[UIImage convertViewToImage:self.headerView.QRCodeImg]];
-    }else if ([platformName isEqualToString:@"qq_Zone"]){
-        [[SocialManager socialManager] qqShareToScene:1 withShareImage:[UIImage convertViewToImage:self.headerView.QRCodeImg]];
-    }
-}
-
-- (void)cancleShareAccountDetail{
-    [self.shareBaseView removeFromSuperview];
-}
-
-- (void)dismiss{
-    [self.shareBaseView removeFromSuperview];
-}
-
 - (void)removePasswordView{
     [self.loginPasswordView removeFromSuperview];
     self.loginPasswordView = nil;
+}
+
+- (void)removeCommonDialogHasPasswordTFView{
+    if (self.commonDialogHasPasswordTFView) {
+        [self.commonDialogHasPasswordTFView removeFromSuperview];
+        self.commonDialogHasPasswordTFView = nil;
+        
+    }
+    [UIView animateWithDuration:1 animations:^{
+        [self.sliderVerifyView.orignalImg setCenter:CGPointMake(4 + 50/2 , 24 )];
+    }];
+}
+
+//AccountManagementHeaderViewDelegate
+
+- (void)shouldImportOwnerPrivateKey{
+    ImportAccountPermisionViewController *vc = [[ImportAccountPermisionViewController alloc] init];
+    vc.model = self.model;
+    vc.importAccountPermisionViewControllerCurrentAction = ImportAccountPermisionViewControllerCurrentActionImportOwnerPrivateKey;
+    [self.navigationController pushViewController:vc animated:YES];
+}
+
+- (void)shouldResetOwnerPrivateKey{
+    
+    ResetAccountPermisionViewController *vc = [[ResetAccountPermisionViewController alloc] init];
+    vc.model = self.model;
+    vc.resetAccountPermisionViewControllerCurrentAction = ResetAccountPermisionViewControllerResetOwnerPrivateKey;
+    [self.navigationController pushViewController:vc animated:YES];
+}
+
+- (void)shouldImportActivePrivateKey{
+    ImportAccountPermisionViewController *vc = [[ImportAccountPermisionViewController alloc] init];
+    vc.model = self.model;
+    vc.importAccountPermisionViewControllerCurrentAction = ImportAccountPermisionViewControllerCurrentActionImportActivePrivateKey;
+    [self.navigationController pushViewController:vc animated:YES];
+}
+
+- (void)shouldResetActivePrivateKey{
+    ResetAccountPermisionViewController *vc = [[ResetAccountPermisionViewController alloc] init];
+    vc.model = self.model;
+    vc.resetAccountPermisionViewControllerCurrentAction = ResetAccountPermisionViewControllerResetActivePrivateKey;
+    [self.navigationController pushViewController:vc animated:YES];
+}
+
+
+- (void)exportPrivateKeyViewShouldDismiss{
+    [self removeCommonDialogHasPasswordTFView];
+}
+
+
+- (void)addCommonDialogHasPasswordView{
+    [self.view addSubview:self.commonDialogHasPasswordTFView];
+    
+    OptionModel *model = [[OptionModel alloc] init];
+    model.optionName = NSLocalizedString(@"删除账号", nil);
+    model.detail = NSLocalizedString(@"1.删除账号后您无法管理该账号、操作其中的资产或使用该账号登录Dapp  \n2.删除账号后，您无法通过PE重新找回该账号  \n3.如果您未备份私钥，删除账号有可能导致您的账号及其中的资产丢失  \n4.删除账号前，请确保您理解删除账号的意义，并已备份私钥", nil);
+    [self.commonDialogHasPasswordTFView setModel:model];
+}
+
+//CommonDialogHasPasswordTFViewDelegate
+- (void)commonDialogHasPasswordTFViewSkipBtnDidClick:(UIButton *)sender{
+    [self removeCommonDialogHasPasswordTFView];
+   
+}
+
+- (void)commonDialogHasPasswordTFViewConfirmBtnDidClick:(UIButton *)sender{
+    // 验证密码输入是否正确
+    Wallet *current_wallet = CURRENT_WALLET;
+    if (![WalletUtil validateWalletPasswordWithSha256:current_wallet.wallet_shapwd password:self.commonDialogHasPasswordTFView.passwordTF.text]) {
+        [TOASTVIEW showWithText:NSLocalizedString(@"密码输入错误!", nil)];
+        [self removeCommonDialogHasPasswordTFView];
+        return;
+    }
+    
+    // 删除账号
+    NSArray *accountArr = [[AccountsTableManager accountTable] selectAccountTable];
+    if (accountArr.count > 1) {
+        BOOL result = [[AccountsTableManager accountTable] executeUpdate: [NSString stringWithFormat:@"DELETE FROM '%@' WHERE account_name = '%@'", current_wallet.account_info_table_name,self.model.account_name]];
+        // 再默认设置一个主账号
+        NSMutableArray *newAccountsArr = [[AccountsTableManager accountTable] selectAccountTable];
+        AccountInfo *model = newAccountsArr[0];
+        //  通知服务器
+        self.setMainAccountRequest.uid = CURRENT_WALLET_UID;
+        self.setMainAccountRequest.eosAccountName = model.account_name;
+        [self.setMainAccountRequest postDataSuccess:^(id DAO, id data) {
+            BaseResult *result = [BaseResult mj_objectWithKeyValues:data];
+            if ([result.code isEqualToNumber:@0]) {
+                // 1.将所有的账号都设为 非主账号
+                Wallet *wallet = CURRENT_WALLET;
+                [[AccountsTableManager accountTable] executeUpdate:[NSString stringWithFormat:@"UPDATE '%@' SET is_main_account = '0' ", wallet.account_info_table_name]];
+                
+                // update account table
+                BOOL result = [[AccountsTableManager accountTable] executeUpdate:[NSString stringWithFormat: @"UPDATE '%@' SET is_main_account = '1'  WHERE account_name = '%@'", wallet.account_info_table_name, model.account_name ]];
+                
+                // update wallet table
+                [[WalletTableManager walletTable] executeUpdate:[NSString stringWithFormat:@"UPDATE '%@' SET wallet_main_account = '%@' WHERE wallet_uid = '%@'" , WALLET_TABLE , model.account_name, CURRENT_WALLET_UID]];
+                NSLog(@"设置主账号成功");
+            }else{
+                [TOASTVIEW showWithText:result.message];
+            }
+            
+        } failure:^(id DAO, NSError *error) {
+            
+        }];
+        
+        
+        if (result) {
+            [TOASTVIEW showWithText:NSLocalizedString(@"删除账号成功!", nil)];
+            [self.navigationController popViewControllerAnimated:YES];
+        }
+    }else{
+        [self.view addSubview:self.askQuestionTipView];
+        self.askQuestionTipView.titleLabel.text = NSLocalizedString(@"检测到您钱包下只有一个账号,继续将执行注销钱包操作!请谨慎~", nil);
+        
+    }
 }
 
 @end

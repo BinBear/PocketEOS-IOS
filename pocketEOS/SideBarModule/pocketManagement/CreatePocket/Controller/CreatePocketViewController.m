@@ -7,7 +7,7 @@
 //
 
 #import "CreatePocketViewController.h"
-#import "CreateAccountViewController.h"
+#import "AddAccountViewController.h"
 #import "WalletTableManager.h"
 #import "Wallet.h"
 #import "ImportPocketViewController.h"
@@ -102,11 +102,11 @@
         return;
     }
     
-    // 查重本地钱包名不可重复
+    // 查重该钱包名称已在您本地存在,请更换尝试~
     NSArray *localWalletsArr = [[WalletTableManager walletTable] selectAllLocalWallet];
     for (Wallet *model in localWalletsArr) {
         if ([model.wallet_name isEqualToString:self.headerView.nameTF.text]) {
-            [TOASTVIEW showWithText:NSLocalizedString(@"本地钱包名不可重复!", nil)];
+            [TOASTVIEW showWithText:NSLocalizedString(@"该钱包名称已在您本地存在,请更换尝试~!", nil)];
             return;
         }
     }
@@ -142,11 +142,7 @@
         [[WalletTableManager walletTable] addRecord: model];
     }
     
-    
-    
-    CreateAccountViewController *vc = [[CreateAccountViewController alloc] init];
-    vc.createAccountViewControllerFromVC = CreateAccountViewControllerFromCreatePocketVC;
-    [self.navigationController pushViewController:vc animated:YES];
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 - (void)privacyPolicyBtnDidClick:(UIButton *)sender{

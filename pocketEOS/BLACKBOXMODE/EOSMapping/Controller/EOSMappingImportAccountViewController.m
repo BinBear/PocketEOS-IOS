@@ -76,7 +76,7 @@
 
 - (void)importEOSMappingAccountBtnDidClick{
     if (IsStrEmpty(self.headerView.privateKeyTF.text) ) {
-        [TOASTVIEW showWithText:NSLocalizedString(@"输入框不能为空!", nil)];
+        [TOASTVIEW showWithText:NSLocalizedString(@"请保证输入信息的完整~", nil)];
         return;
     }else{
         private_active_Key_is_validate = [EOS_Key_Encode validateWif:self.headerView.privateKeyTF.text];
@@ -125,7 +125,7 @@
         
         EOSMappingResult *result = [EOSMappingResult mj_objectWithKeyValues:data];
         if (![result.code isEqualToNumber:@0]) {
-            [TOASTVIEW showWithText: result.msg];
+            [TOASTVIEW showWithText: result.message];
         }else{
             if (result.account_names.count > 0) {
                 // 本地公钥和网络公钥匹配, 允许进行导入本地操作

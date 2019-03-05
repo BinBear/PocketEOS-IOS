@@ -8,7 +8,6 @@
 
 #import "PocketManagementViewController.h"
 #import "NavigationView.h"
-#import "CreateAccountViewController.h"
 #import "ImportAccountViewController.h"
 #import "BackupPocketView.h"
 #import "AccountManagementViewController.h"
@@ -16,7 +15,10 @@
 #import "PocketManagementServiceTableViewCell.h"
 #import "ChangePasswordView.h"
 #import "PocketManagementHeaderView.h"
-
+#import "AddAccountViewController.h"
+#import "PersonalSettingViewController.h"
+#import "ImportAccountsRequest.h"
+#import "AssestsCollectionViewController.h"
 
 @interface PocketManagementViewController ()<UIGestureRecognizerDelegate, UITableViewDelegate , UITableViewDataSource, NavigationViewDelegate, BackupPocketViewDelegate, UIDocumentInteractionControllerDelegate, ChangePasswordViewDelegate, PocketManagementHeaderViewDelegate>
 @property(nonatomic, strong) NavigationView *navView;
@@ -24,6 +26,7 @@
 @property(nonatomic, strong) ChangePasswordView *changePasswordView;
 @property (nonatomic ,retain)UIDocumentInteractionController *documentController;
 @property(nonatomic, strong) PocketManagementHeaderView *headerView;
+@property(nonatomic , strong) ImportAccountsRequest *importAccountsRequest;
 @end
 
 @implementation PocketManagementViewController
@@ -72,10 +75,24 @@
     return _mainService;
 }
 
-- (void)viewWillAppear:(BOOL)animated{
+- (ImportAccountsRequest *)importAccountsRequest{
+    if (!_importAccountsRequest) {
+        _importAccountsRequest = [[ImportAccountsRequest alloc] init];
+    }
+    return _importAccountsRequest;
+}
+
+-(void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
     [self buildDataSource];
+    [MobClick beginLogPageView:@"钱包管理"];
 }
+
+-(void)viewWillDisappear:(BOOL)animated{
+    [super viewWillDisappear:animated];
+    [MobClick endLogPageView:@"钱包管理"];
+}
+
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -88,6 +105,7 @@
     self.mainTableView.mj_header.hidden = YES;
     self.mainTableView.mj_footer.hidden = YES;
     [self buildDataSource];
+    [self importAccountsToServer];
 }
 
 - (void)buildDataSource{ 
@@ -96,6 +114,16 @@
         if (isSuccess) {
             [weakSelf.mainTableView reloadData];
         }
+    }];
+}
+
+- (void)importAccountsToServer{
+    NSArray *array = [[AccountsTableManager accountTable] selectAllNativeAccountName];
+    self.importAccountsRequest.accountList = array;
+    [self.importAccountsRequest postOuterDataSuccess:^(id DAO, id data) {
+        NSLog(@"%@", data);
+    } failure:^(id DAO, NSError *error) {
+        NSLog(@"%@", error);
     }];
 }
 
@@ -151,22 +179,23 @@
 
 -(void)rightBtnDidClick{
     RtfBrowserViewController *vc = [[RtfBrowserViewController alloc] init];
-    vc.rtfFileName = @"PockSecureDecalre";
+    vc.rtfFileName = @"PockSecureDeclare";
     [self.navigationController pushViewController:vc animated:YES];
 }
 
 //PocketManagementHeaderViewDelegate
 - (void)createAccountBtnDidClick{
-    CreateAccountViewController *vc = [[CreateAccountViewController alloc] init];
-    vc.createAccountViewControllerFromVC = CreateAccountViewControllerFromPocketManagementVC;
-    [self.navigationController pushViewController:vc animated:YES];
-    
+    AddAccountViewController *vc = [[AddAccountViewController alloc] init];
+    vc.addAccountViewControllerFromMode = AddAccountViewControllerFromOtherPage;
+    [self presentViewController:[[UINavigationController alloc] initWithRootViewController:vc] animated:YES completion:nil];
 }
-- (void)importAccountBtnDidClick{
-    ImportAccountViewController *vc = [[ImportAccountViewController alloc] init];
-    [self.navigationController pushViewController:vc animated:YES];
 
+- (void)assestsCollectionBtnDidClick{
+    
+    AssestsCollectionViewController *vc = [[AssestsCollectionViewController alloc] init];
+    [self.navigationController pushViewController:vc animated:YES];
 }
+
 - (void)backupWalletBtnDidClick{
     [self.view addSubview:self.backupPocketView];
     Wallet *wallet = CURRENT_WALLET;

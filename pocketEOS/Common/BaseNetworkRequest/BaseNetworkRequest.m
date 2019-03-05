@@ -5,7 +5,7 @@
 //  Created by oraclechain on 2017/11/29.
 //  Copyright © 2017年 oraclechain. All rights reserved.
 //
-#define REQUEST_BASEURL @"https://api.pocketeos.top"
+
 
 #define REQUEST_APIPATH [NSString stringWithFormat: @"%@", [self requestUrlPath]]
 
@@ -89,15 +89,22 @@
     if (cookie != nil) {
         [self.networkingManager.requestSerializer setValue:cookie forHTTPHeaderField:@"Set-Cookie"];
     }
+    
+    [self.networkingManager.requestSerializer setValue:@"ios" forHTTPHeaderField:@"system_version"];
 
     if (LEETHEME_CURRENTTHEME_IS_SOCAIL_MODE) {
         [self.networkingManager.requestSerializer setValue:CURRENT_WALLET_UID forHTTPHeaderField:@"uid"];
         
     }else if(LEETHEME_CURRENTTHEME_IS_BLACKBOX_MODE){
         [self.networkingManager.requestSerializer setValue:@"6f1a8e0eb24afb7ddc829f96f9f74e9d" forHTTPHeaderField:@"uid"];
-        
-
     }
+    
+    if ([NSBundle isChineseLanguage]) {
+        [self.networkingManager.requestSerializer setValue:@"chinese" forHTTPHeaderField:@"language"];
+    }else{
+        [self.networkingManager.requestSerializer setValue:@"english" forHTTPHeaderField:@"language"];
+    }
+    
     self.networkingManager.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"application/json", @"text/html",@"text/json", @"text/javascript", @"text/plain", nil];
     
     return YES;
@@ -151,6 +158,12 @@
     id parameters = [self parameters];
     NSLog(@"REQUEST_APIPATH = %@", REQUEST_APIPATH);
     NSLog(@"parameters = %@", parameters);
+    // 设置超时时间
+    [self.networkingManager.requestSerializer willChangeValueForKey:@"timeoutInterval"];
+    self.networkingManager.requestSerializer.timeoutInterval = 30.f;
+    [self.networkingManager.requestSerializer didChangeValueForKey:@"timeoutInterval"];
+    
+    
     self.sessionDataTask = [self.networkingManager GET:REQUEST_APIPATH parameters:parameters progress:^(NSProgress * _Nonnull downloadProgress) {
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
         NSLog(@"responseObject:%@", responseObject);
@@ -225,6 +238,9 @@
         //failure block
         if(IsNilOrNull(failure)){
             return;
+        }
+        if(error.code == -1001){
+            [TOASTVIEW showWithText:NSLocalizedString(@"请求超时, 请稍后再试!", nil)];
         }
         NSLog(@"%@", error);
         failure(task, error);
@@ -410,8 +426,24 @@
 //    manager.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"application/json", @"text/html",@"text/json", @"text/javascript", @"text/plain", nil];
     // request Json 序列化
     manager.requestSerializer=[AFJSONRequestSerializer serializer];
+    
+    
+    if (LEETHEME_CURRENTTHEME_IS_SOCAIL_MODE) {
+        [manager.requestSerializer setValue:CURRENT_WALLET_UID forHTTPHeaderField:@"uid"];
+        
+    }else if(LEETHEME_CURRENTTHEME_IS_BLACKBOX_MODE){
+        [manager.requestSerializer setValue:@"6f1a8e0eb24afb7ddc829f96f9f74e9d" forHTTPHeaderField:@"uid"];
+    }
+    
+    if ([NSBundle isChineseLanguage]) {
+        [manager.requestSerializer setValue:@"chinese" forHTTPHeaderField:@"language"];
+    }else{
+        [manager.requestSerializer setValue:@"english" forHTTPHeaderField:@"language"];
+    }
+    
     [manager POST:[self requestUrlPath] parameters:parameters progress:^(NSProgress * _Nonnull uploadProgress) {
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+        NSLog(@"%@", responseObject);
         if ([self validateResponseData:responseObject HttpURLResponse:task.response]) {
             if (IsNilOrNull(success)) {
                 return ;
@@ -423,7 +455,7 @@
             success(weakSelf.networkingManager, responseObject);
         }
         [SVProgressHUD dismiss];
-        NSLog(@"responseObject %@", responseObject);
+//        NSLog(@"responseObject %@", responseObject);
     } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
         [SVProgressHUD dismiss];
          NSLog(@"error ==%@", [error userInfo][@"com.alamofire.serialization.response.error.string"]);

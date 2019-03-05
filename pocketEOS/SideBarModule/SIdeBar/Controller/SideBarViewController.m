@@ -14,7 +14,7 @@
 #import "SystemSettingViewController.h"
 #import "VersionUpdateViewController.h"
 #import "MessageCenterViewController.h"
-#import "LoginMainViewController.h"
+#import "LoginEntranceViewController.h"
 #import "BBLoginViewController.h"
 #import "AppDelegate.h"
 #import "WalletQRCodeView.h"
@@ -23,6 +23,7 @@
 #import "CandyMainViewController.h"
 #import "BackupAccountViewController.h"
 #import "BPVoteViewController.h"
+#import "BindPhoneNumberViewController.h"
 
 
 @interface SideBarViewController ()<WalletQRCodeViewDelegate, SideBarMainViewDelegate >
@@ -153,9 +154,12 @@
     [[NSUserDefaults standardUserDefaults] setObject: nil  forKey:Current_wallet_uid];
     [[NSUserDefaults standardUserDefaults] synchronize];
     
+    [[NSUserDefaults standardUserDefaults] setObject: nil  forKey:Current_Account_name];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+    
     UIViewController *vc;
     if (LEETHEME_CURRENTTHEME_IS_SOCAIL_MODE) {
-        vc = [[LoginMainViewController alloc] init];
+        vc = [[LoginEntranceViewController alloc] init];
     }else if (LEETHEME_CURRENTTHEME_IS_BLACKBOX_MODE){
         vc = [[BBLoginViewController alloc] init];
     }

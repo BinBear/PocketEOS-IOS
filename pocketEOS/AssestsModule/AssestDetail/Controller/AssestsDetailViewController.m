@@ -9,13 +9,12 @@
 #import "AssestsDetailViewController.h"
 #import "AssestsDetailHeaderView.h"
 #import "NavigationView.h"
-#import "TransferViewController.h"
 #import "TransferNewViewController.h"
 #import "RecieveViewController.h"
 #import "RedPacketViewController.h"
 #import "TendencyChartView.h"
 #import "TransactionRecordsService.h"
-#import "TransactionRecordTableViewCell.h"
+#import "TransferRecordsTableViewCell.h"
 #import "TransactionRecord.h"
 #import "GetSparklinesRequest.h"
 #import "AssestsShareDetailView.h"
@@ -24,6 +23,8 @@
 #import "SocialManager.h"
 #import "AssestDetailFooterView.h"
 #import "TransferModel.h"
+#import "TransferRecordsTableViewCell.h"
+#import "TransferDetailsViewController.h"
 
 @interface AssestsDetailViewController ()< UITableViewDelegate , UITableViewDataSource, NavigationViewDelegate, AssestsDetailHeaderViewDelegate, SocialSharePanelViewDelegate, AssestDetailFooterViewDelegate>
 @property(nonatomic, strong) NavigationView *navView;
@@ -45,7 +46,7 @@
 
 - (NavigationView *)navView{
     if (!_navView) {
-        _navView = [NavigationView navigationViewWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, NAVIGATIONBAR_HEIGHT) LeftBtnImgName:@"back" title:NSLocalizedString(@"资产", nil)rightBtnImgName:@"share" delegate:self];
+        _navView = [NavigationView navigationViewWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, NAVIGATIONBAR_HEIGHT) LeftBtnImgName:@"back" title:self.model.token_symbol rightBtnImgName:@"share" delegate:self];
         _navView.leftBtn.lee_theme.LeeAddButtonImage(SOCIAL_MODE, [UIImage imageNamed:@"back"], UIControlStateNormal).LeeAddButtonImage(BLACKBOX_MODE, [UIImage imageNamed:@"back_white"], UIControlStateNormal);
         if (LEETHEME_CURRENTTHEME_IS_SOCAIL_MODE) {
             _navView.rightBtn.hidden = NO;
@@ -93,8 +94,8 @@
         _socialSharePanelView.backgroundColor = HEXCOLOR(0xF7F7F7);
         _socialSharePanelView.delegate = self;
         NSMutableArray *modelArr = [NSMutableArray array];
-        NSArray *titleArr = @[NSLocalizedString(@"微信好友", nil),NSLocalizedString(@"朋友圈", nil), NSLocalizedString(@"QQ好友", nil), NSLocalizedString(@"QQ空间", nil)];
-        for (int i = 0; i < 4; i++) {
+        NSArray *titleArr = @[NSLocalizedString(@"微信好友", nil),NSLocalizedString(@"朋友圈", nil)];//, NSLocalizedString(@"QQ好友", nil), NSLocalizedString(@"QQ空间", nil)
+        for (int i = 0; i < titleArr.count; i++) {
             SocialShareModel *model = [[SocialShareModel alloc] init];
             model.platformName = titleArr[i];
             model.platformImage = self.platformNameArr[i];
@@ -170,14 +171,7 @@
 
 - (void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
-
-    self.currentAccountName = self.accountName;
-    self.currentAssestsType = self.model.token_symbol;
-    self.transactionRecordsService.getTransactionRecordsRequest.from = self.accountName;
-    self.transactionRecordsService.getTransactionRecordsRequest.to = self.accountName;
-    self.currentContractName = self.model.contract_name;
-     self.transactionRecordsService.getTransactionRecordsRequest.symbols = [NSMutableArray arrayWithObjects:@{@"symbolName":VALIDATE_STRING(self.model.token_symbol)  , @"contractName": VALIDATE_STRING(self.model.contract_name) }, nil];
-    [self loadNewData];
+    
 }
 
 -(void)viewWillDisappear:(BOOL)animated{
@@ -192,6 +186,10 @@
     [self.mainTableView setTableHeaderView:self.headerView];
     self.mainTableView.frame = CGRectMake(0, NAVIGATIONBAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT - NAVIGATIONBAR_HEIGHT- TABBAR_HEIGHT);
     [self.view addSubview:self.footerView];
+    self.currentAccountName = self.accountName;
+    self.currentAssestsType = self.model.token_symbol;
+    self.currentContractName = self.model.contract_name;
+    [self requestTransactionHistory];
     [self configHeaderView];
    
 //    NSValue *value0 = [NSValue valueWithCGPoint:(CGPointMake(0, 40))];
@@ -223,32 +221,42 @@
     
 }
 
+- (void)requestTransactionHistory{
+    self.transactionRecordsService.getTransactionRecordsRequest.from = self.accountName;
+    self.transactionRecordsService.getTransactionRecordsRequest.to = self.accountName;
+    self.transactionRecordsService.getTransactionRecordsRequest.symbols = [NSMutableArray arrayWithObjects:@{@"symbolName":VALIDATE_STRING(self.model.token_symbol)  , @"contractName": VALIDATE_STRING(self.model.contract_name) }, nil];
+    [self loadNewData];
+}
+
 - (void)configHeaderView{
-    self.headerView.amountLabel.text = [NSString stringWithFormat:@"%@ CNY", [NumberFormatter displayStringFromNumber:@( self.model.asset_price_cny.doubleValue)]];
+    self.headerView.amountLabel.text = [NSString stringWithFormat:@"￥%@", [NumberFormatter displayStringFromNumber:@( self.model.asset_price_cny.doubleValue)]];
     if ([self.model.asset_price_change_in_24h hasPrefix:@"-"]) {
         //        HEXCOLOR(0x1E903C) HEXCOLOR(0xB0B0B0)
-        NSMutableAttributedString *attrString = [[NSMutableAttributedString alloc] initWithString: [NSString stringWithFormat:@"%@%%   24h", self.model.asset_price_change_in_24h]];
+        NSMutableAttributedString *attrString = [[NSMutableAttributedString alloc] initWithString: [NSString stringWithFormat:@"%@%%(%@)", self.model.asset_price_change_in_24h, NSLocalizedString(@"今日", nil)]];
         [attrString addAttribute:NSForegroundColorAttributeName
                            value:HEXCOLOR(0xB51515)
                            range:NSMakeRange(0, self.model.asset_price_change_in_24h.length + 1)];
         [attrString addAttribute:NSForegroundColorAttributeName
                            value:HEXCOLOR(0xB51515)
-                           range:NSMakeRange(self.model.asset_price_change_in_24h.length+1, 6)];
+                           range:NSMakeRange(self.model.asset_price_change_in_24h.length+1, 4)];
         self.headerView.fluctuateLabel.attributedText = attrString;
     }else{
         //B51515
-        NSMutableAttributedString *attrString = [[NSMutableAttributedString alloc] initWithString: [NSString stringWithFormat:@"+%@%%   24h", self.model.asset_price_change_in_24h]];
+        NSMutableAttributedString *attrString = [[NSMutableAttributedString alloc] initWithString: [NSString stringWithFormat:@"+%@%%(%@)", self.model.asset_price_change_in_24h , NSLocalizedString(@"今日", nil)]];
         [attrString addAttribute:NSForegroundColorAttributeName
                            value:HEXCOLOR(0x1E903C)
                            range:NSMakeRange(0, self.model.asset_price_change_in_24h.length + 2)];
         [attrString addAttribute:NSForegroundColorAttributeName
                            value:HEXCOLOR(0x1E903C)
-                           range:NSMakeRange(self.model.asset_price_change_in_24h.length + 2, 6)];
+                           range:NSMakeRange(self.model.asset_price_change_in_24h.length + 2, 4)];
         
         self.headerView.fluctuateLabel.attributedText = attrString;
     }
-
-    self.headerView.totalLabel.text = [NSString stringWithFormat:@"%@(24h)%@CNY", NSLocalizedString(@"额", nil),self.model.asset_market_cap_cny];
+    if (self.model.asset_market_cap_cny.integerValue == 0 ) {
+        self.headerView.totalLabel.text = NSLocalizedString(@"我们正在努力寻找它的价格...", nil);
+    }else{
+        self.headerView.totalLabel.text = [NSString stringWithFormat:@"%@(24h)%@CNY", NSLocalizedString(@"额", nil),self.model.asset_market_cap_cny];
+    }
     self.headerView.accountLabel.text = self.accountName;
     
     self.headerView.Assest_balance_Label.text = [NSString stringWithFormat:@"%@ %@", [NumberFormatter displayStringFromNumber:@(self.model.balance.doubleValue)], self.model.token_symbol];
@@ -258,39 +266,42 @@
     WS(weakSelf);
     [self.getSparklinesRequest getDataSusscess:^(id DAO, id data) {
         NSString *tendencyUrlStr ;
-        if ([weakSelf.model.token_symbol isEqualToString:@"EOS"]) {
+        if ([weakSelf.model.token_symbol isEqualToString:@"EOS"] && [weakSelf.model.contract_name isEqualToString:ContractName_EOSIOTOKEN]) {
             tendencyUrlStr = data[@"data"][@"sparkline_eos_png"];
-        }else if ([weakSelf.model.token_symbol isEqualToString:@"OCT"]){
+        }else if ([weakSelf.model.token_symbol isEqualToString:@"OCT"] && [weakSelf.model.contract_name isEqualToString:ContractName_OCTOTHEMOON]){
             tendencyUrlStr = data[@"data"][@"sparkline_oct_png"];
         }
         if (!IsNilOrNull(weakSelf.sparklinesImageView)) {
             [weakSelf.sparklinesImageView removeFromSuperview];
         }
         [weakSelf.headerView.tendencyChartView addSubview:weakSelf.sparklinesImageView];
-        [weakSelf.sparklinesImageView sd_setImageWithURL:String_To_URL(tendencyUrlStr) placeholderImage:[UIImage imageNamed:@"sparklined_placeholder_image"] options:(SDWebImageCacheMemoryOnly)];
+        [weakSelf.sparklinesImageView sd_setImageWithURL:String_To_URL(tendencyUrlStr) placeholderImage:[UIImage imageNamed:@"assestsSparkLinePlaceholder"] options:(SDWebImageCacheMemoryOnly)];
     } failure:^(id DAO, NSError *error) {
         NSLog(@"%@", error);
     }];
 }
 
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
-    TransactionRecordTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CELL_REUSEIDENTIFIER];
+    TransferRecordsTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CELL_REUSEIDENTIFIER];
     if (!cell) {
-        cell = [[TransactionRecordTableViewCell alloc] initWithStyle:(UITableViewCellStyleDefault) reuseIdentifier:CELL_REUSEIDENTIFIER];
+        cell = [[TransferRecordsTableViewCell alloc] initWithStyle:(UITableViewCellStyleDefault) reuseIdentifier:CELL_REUSEIDENTIFIER];
     }
     TransactionRecord *model = self.transactionRecordsService.dataSourceArray[indexPath.row];
-    model = self.transactionRecordsService.assestsTransactionDatasourceArray[indexPath.row];
+    model = self.transactionRecordsService.dataSourceArray[indexPath.row];
     cell.currentAccountName = self.currentAccountName;
     cell.model = model;
     return cell;
 }
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
-    return self.transactionRecordsService.assestsTransactionDatasourceArray.count;
+    return self.transactionRecordsService.dataSourceArray.count;
 }
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
-    NSLog(@"%@", indexPath);
+    TransactionRecord *model = self.transactionRecordsService.dataSourceArray[indexPath.row];
+    TransferDetailsViewController *vc = [[TransferDetailsViewController alloc] init];
+    vc.model = model;
+    [self.navigationController pushViewController:vc animated:YES];
 }
 
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
@@ -359,13 +370,11 @@
 - (void)assestsDetailFooterViewDidClick:(UIButton *)sender{
     if (sender.tag == 1000) {
         TransferNewViewController *vc = [[TransferNewViewController alloc] init];
-        vc.currentAccountName = self.accountName;
         vc.currentAssestsType = self.currentAssestsType;
         vc.get_token_info_service_data_array = self.get_token_info_service_data_array;
         [self.navigationController pushViewController:vc animated:YES];
     }else if (sender.tag == 1001){
         RecieveViewController *vc = [[RecieveViewController alloc] init];
-        vc.accountName = self.accountName;
         TransferModel *model = [[TransferModel alloc] init];
         model.account_name = self.accountName;
         model.coin = self.currentAssestsType;
@@ -373,9 +382,12 @@
         vc.get_token_info_service_data_array = self.get_token_info_service_data_array;
         [self.navigationController pushViewController:vc animated:YES];
     }else if (sender.tag == 1002){
-        RedPacketViewController *vc = [[RedPacketViewController alloc] init];
-        vc.accountName = self.accountName;
-        [self.navigationController pushViewController:vc animated:YES];
+        if ([self.model.token_symbol isEqualToString:@"OCT"]  || [self.model.token_symbol isEqualToString:@"EOS"]) {
+            RedPacketViewController *vc = [[RedPacketViewController alloc] init];
+            [self.navigationController pushViewController:vc animated:YES];
+        }else{
+            [TOASTVIEW showWithText:NSLocalizedString(@"暂不支持该TOKEN红包", nil)];
+        }
     }
 }
 

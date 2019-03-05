@@ -41,6 +41,8 @@
 
 
 
+
+
 /**
  为true是发送信息，false表示领取信息
  */
@@ -51,6 +53,7 @@
  */
 @property(nonatomic , strong) NSMutableArray *redPacketOrderRedisDtos;
 
+@property(nonatomic , copy) NSString *type;
 
-
+@property(nonatomic , strong) NSNumber *status;
 @end

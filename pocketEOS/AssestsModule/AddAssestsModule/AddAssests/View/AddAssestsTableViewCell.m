@@ -45,6 +45,7 @@
 - (UISwitch *)assestsSwitch{
     if (!_assestsSwitch) {
         _assestsSwitch = [[UISwitch alloc] init];
+        _assestsSwitch.onTintColor = HEXCOLOR(0x4090FE);
         [_assestsSwitch addTarget:self action:@selector(assestsSwitchStatusChange) forControlEvents:(UIControlEventValueChanged)];
     }
     return _assestsSwitch;
@@ -76,7 +77,14 @@
     [_avatarImg sd_setImageWithURL: String_To_URL(model.iconUrl) placeholderImage:[UIImage imageNamed:@"account_default_blue"]];
     _titleLabel.text = model.assetName;
     _detailLabel.text = model.contractName;
+    
     _assestsSwitch.on = model.isFollow;
+    
+    if ([model.assetName isEqualToString:@"EOS"] || [model.assetName isEqualToString:@"OCT"]  ) {
+        _assestsSwitch.enabled = NO;
+    }else{
+        _assestsSwitch.enabled = YES;
+    }
 }
 
 - (void)assestsSwitchStatusChange{

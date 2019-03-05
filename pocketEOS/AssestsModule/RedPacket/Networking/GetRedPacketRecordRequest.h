@@ -11,10 +11,6 @@
 
 @interface GetRedPacketRecordRequest : BaseNetworkRequest
 // 获取红包记录
-/**
- 用户id
- */
-@property(nonatomic, copy) NSString *uid;
 
 /**
  账号

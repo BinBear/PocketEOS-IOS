@@ -92,6 +92,7 @@ static const NSInteger CDZToolBarHeight = 44;
                        confirm:(CDZConfirmBlock)confirmBlock
                         cancel:(CDZCancelBlock)cancelBlcok{
     CDZPicker *pickerView = [[CDZPicker alloc]initWithFrame:view.bounds];
+    pickerView.backgroundColor = [UIColor colorWithWhite:0.f alpha:0.5];
     
     NSMutableArray *tmp = [NSMutableArray arrayWithCapacity:strings.count];
 
@@ -139,7 +140,7 @@ static const NSInteger CDZToolBarHeight = 44;
 }
 
 - (void)setupViews{
-//    self.backgroundColor = self.builder.isShowMask ? BACKGROUND_BLACK_COLOR : UIColor.clearColor;
+    self.backgroundColor = self.builder.isShowMask ? BACKGROUND_BLACK_COLOR : UIColor.clearColor;
     UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(dissView)];
     [self addGestureRecognizer:tap];
     [self addSubview:self.containerView];
@@ -148,7 +149,7 @@ static const NSInteger CDZToolBarHeight = 44;
     [self.containerView addSubview:self.confirmButton];
     [self.containerView addSubview:self.cancelButton];
     [self.containerView addSubview:self.lineView];
-    NSInteger defaultIndex =  (self.builder.defaultIndex < self.numberOfComponents && self.builder.defaultIndex > 0) ? self.builder.defaultIndex : 0;
+    NSInteger defaultIndex =  (self.builder.defaultIndex < self.componets.count && self.builder.defaultIndex > 0) ? self.builder.defaultIndex : 0;
     [self.pickerView selectRow:defaultIndex inComponent:0 animated:NO];
 }
 
@@ -174,7 +175,7 @@ static const NSInteger CDZToolBarHeight = 44;
 }
 
 - (void)cancel:(UIButton *)button{
-    [self dissView];
+//    [self dissView];
 }
 
 
@@ -322,14 +323,17 @@ static const NSInteger CDZToolBarHeight = 44;
 
 - (UIButton *)cancelButton{
     if (!_cancelButton) {
-        _cancelButton = [[UIButton alloc] initWithFrame:CGRectMake(10, 0, 60, 44)];
+        _cancelButton = [[UIButton alloc] initWithFrame:CGRectMake(10, 0, 200, 44)];
         _cancelButton.backgroundColor = UIColor.clearColor;
         _cancelButton.titleLabel.font = [UIFont systemFontOfSize:14.0];
+        _cancelButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
         NSString *title = self.builder.cancelText.length ? self.builder.cancelText : NSLocalizedString(@"取消", nil);
         [_cancelButton.titleLabel setTextAlignment:(NSTextAlignmentLeft)];
         [_cancelButton setTitle:title forState:UIControlStateNormal];
-        [_cancelButton setTitleColor:HEXCOLOR(0x4D7BFE) forState:UIControlStateNormal];
-        [_cancelButton addTarget:self action:@selector(cancel:) forControlEvents:UIControlEventTouchUpInside];
+        [_cancelButton setTitleColor:HEXCOLOR(0x2A2A2A) forState:UIControlStateNormal];
+        _cancelButton.userInteractionEnabled = NO;
+//        [_cancelButton addTarget:self action:@selector(cancel:) forControlEvents:UIControlEventTouchUpInside];
+        
     }
     return _cancelButton;
 }

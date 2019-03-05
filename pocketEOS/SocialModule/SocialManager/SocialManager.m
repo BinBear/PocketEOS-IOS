@@ -10,7 +10,7 @@
 
 
 #define WX_APP_ID @"wxde396b6e74029855"
-#define WX_AppSecret @"c5f714b7e139cbf035ade615a070215c"
+#define WX_AppSecret @"b33d07486a01a84d163498b9be2cfe8d"
 
 #define QQ_APP_ID @"1106779320"
 #define QQ_KEY @"XHdoC72UY7Gt22Cu"
@@ -34,7 +34,13 @@
 
 - (void)initWithSocialSDK:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     //注册微信SDK
-    [WXApi registerApp:WX_APP_ID];
+    BOOL result =  [WXApi registerApp:WX_APP_ID];
+    if (result) {
+        NSLog(@"WXApi registerApp status 1");
+    }else{
+        NSLog(@"WXApi registerApp status 0");
+    }
+    
 }
 
 
@@ -117,7 +123,14 @@
     SendAuthReq *req = [[SendAuthReq alloc] init];
     req.scope = @"snsapi_userinfo";
     req.state = @"1";
-    [WXApi sendReq:req];
+    
+   BOOL result =  [WXApi sendReq:req];
+    if (result) {
+        NSLog(@"WXApi sendReq status 1");
+    }else{
+        NSLog(@"WXApi sendReq status 0");
+    }
+    
 }
 
 //WXApiDelegate
@@ -162,12 +175,14 @@
         }else if (resp.errCode == -4){
             // 用户拒绝授权
             [SVProgressHUD dismiss];
-            
+            self.onWechatLoginFailed(resp);
         }else if (resp.errCode == -2){
             // 用户取消
             [SVProgressHUD dismiss];
+            self.onWechatLoginFailed(resp);
         }else{
             [SVProgressHUD dismiss];
+            self.onWechatLoginFailed(resp);
         }
     }else if ([resp isKindOfClass:[AddCardToWXCardPackageResp class]]) {
         [SVProgressHUD dismiss];
@@ -218,7 +233,7 @@
     WXMediaMessage *message = [WXMediaMessage message];
     message.title = model.title;
     message.description = model.detailDescription;
-    [message setThumbImage:[UIImage imageNamed: @"redpacket"]];
+    [message setThumbImage:[UIImage imageNamed: model.imageName]];
     
     WXWebpageObject *webpageObject = [WXWebpageObject object];
     webpageObject.webpageUrl = model.webPageUrl;

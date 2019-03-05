@@ -59,6 +59,9 @@ typedef NS_OPTIONS(NSUInteger, PushTransactionType) {
 
 @property(nonatomic , copy) NSString *password;
 
+@property(nonatomic , copy) NSString *permission;
+
+
 // 获取关注的所有账号
 - (void)getRichlistAccount:(CompleteBlock)complete;
 
@@ -69,4 +72,5 @@ typedef NS_OPTIONS(NSUInteger, PushTransactionType) {
 - (void)get_rate:(CompleteBlock)complete;
 
 
+@property(nonatomic, copy) NSString *ref_block_num;
 @end

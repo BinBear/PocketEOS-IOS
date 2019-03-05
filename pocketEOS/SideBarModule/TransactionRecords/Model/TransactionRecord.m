@@ -19,18 +19,7 @@
              @"quantity" : @"doc.data.quantity",
              @"memo" : @"doc.data.memo",
              @"expiration" : @"doc.data.expiration",
-             @"ref_block_num" : @"blockNum"
+             @"contract" : @"doc.account"
              };
 }
 @end
-
-
-//             @"transactionType" : @"transaction.transaction.actions[0].name",
-//             @"from" : @"transaction.transaction.actions[0].data.from",
-//             @"to" : @"transaction.transaction.actions[0].data.to",
-//             @"quantity" : @"transaction.transaction.actions[0].data.quantity",
-//             @"memo" : @"transaction.transaction.actions[0].data.memo",
-//             @"expiration" : @"transaction.transaction.expiration",
-//             @"ref_block_num" : @"transaction.transaction.ref_block_num"
-//             };
-

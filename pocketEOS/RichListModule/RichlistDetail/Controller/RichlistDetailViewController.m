@@ -105,7 +105,7 @@
 
 - (void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
-    
+    self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
     WS(weakSelf);
     // 检查是否已经关注
     self.checkWhetherFollowRequest.fuid = CURRENT_WALLET_UID;
@@ -143,7 +143,7 @@
 
 -(void)viewWillDisappear:(BOOL)animated{
     [super viewWillDisappear:animated];
-    
+    self.navigationController.navigationBar.barStyle = UIBarStyleDefault;
 }
 
 - (void)viewDidLoad {
@@ -155,6 +155,7 @@
     self.mainTableView.backgroundColor = [UIColor clearColor];
     [self.mainTableView setTableHeaderView:self.headerView];
     [self.mainTableView.mj_header beginRefreshing];
+    self.mainTableView.mj_footer.hidden = YES;
     [self loadAllBlocks];
 }
 
@@ -165,15 +166,10 @@
     
     if ([self.model.followType isEqualToNumber:@1]) {
         // 钱包
-        NSString *nameStr = nil;
-        if (self.model.displayName.length > 4) {
-            nameStr = [self.model.displayName substringFromIndex:self.model.displayName.length - 4];
-        }else{
-            nameStr = self.model.displayName ;
-        }
-        self.headerView.userNameLabel.text = [NSString stringWithFormat: @"%@%@", VALIDATE_STRING(nameStr), NSLocalizedString(@"的钱包", nil)];
+        self.headerView.userNameLabel.text = [NSString stringWithFormat: @"%@%@", VALIDATE_STRING(self.model.displayName), NSLocalizedString(@"的钱包", nil)];
         [self.headerView.avatarImg sd_setImageWithURL:String_To_URL(self.model.avatar) placeholderImage:[UIImage imageNamed:@"wallet_default_avatar"]];
         self.mainService.getWalletAccountsRequest.uid = self.model.uid;
+        self.mainService.getWalletAccountsRequest.fuid = CURRENT_WALLET_UID;
         [self.mainService getWalletAccountsRequest:^(WalletAccountsResult *result, BOOL isSuccess) {
             [weakSelf.mainTableView.mj_header endRefreshing];
             if (isSuccess) {
@@ -188,24 +184,24 @@
                             }
                            
                             self.get_token_info_service.get_token_info_request.accountName = model.eosAccountName;
-//                            self.get_token_info_service.get_token_info_request.ids = self.ids;
                             [self.get_token_info_service get_token_info:^(id service, BOOL isSuccess) {
                                 // 拿到当前的下拉刷新控件，结束刷新状态
                                 [weakSelf.mainTableView.mj_header endRefreshing];
                                 if (isSuccess) {
                                     //            weakSelf.currentAccountResult = result;
-                                    //            weakSelf.headerView.model = result.data;
+//                                                weakSelf.headerView.model = result.data;
                                     [weakSelf.mainTableView reloadData];
                                     [weakSelf.headerView updateViewWithDataArray:weakSelf.get_token_info_service.dataSourceArray];
                                 }
                             }];
-                            weakSelf.mainService.getAccountAssetRequest.name = model.eosAccountName;
-                            [weakSelf.mainService get_account_asset:^(AccountResult *result, BOOL isSuccess) {
-                                if (isSuccess) {
-                                    weakSelf.headerView.model = result.data;
-//                                    [weakSelf.mainTableView reloadData];
-                                }
-                            }] ;
+                            weakSelf.headerView.userAccountLabel.text = model.eosAccountName;
+//                            weakSelf.mainService.getAccountAssetRequest.name = model.eosAccountName;
+//                            [weakSelf.mainService get_account_asset:^(AccountResult *result, BOOL isSuccess) {
+//                                if (isSuccess) {
+//                                    weakSelf.headerView.model = result.data;
+////                                    [weakSelf.mainTableView reloadData];
+//                                }
+//                            }] ;
                         }
                     }
                 }
@@ -216,9 +212,9 @@
         if (IsNilOrNull(self.model.displayName)) {
             return;
         }
-        
+        self.headerView.userNameLabel.text = [NSString stringWithFormat:NSLocalizedString(@"***的钱包", nil)];
+        [self.headerView.avatarImg sd_setImageWithURL:String_To_URL(@"") placeholderImage:[UIImage imageNamed:@"wallet_default_avatar"]];
         self.get_token_info_service.get_token_info_request.accountName = self.model.displayName;
-        //                            self.get_token_info_service.get_token_info_request.ids = self.ids;
         [self.get_token_info_service get_token_info:^(id service, BOOL isSuccess) {
             // 拿到当前的下拉刷新控件，结束刷新状态
             [weakSelf.mainTableView.mj_header endRefreshing];
@@ -231,18 +227,18 @@
         }];
         
         
-        self.mainService.getAccountAssetRequest.name =  self.model.displayName;
+//        self.mainService.getAccountAssetRequest.name =  self.model.displayName;
         
-        [self.mainService get_account_asset:^(AccountResult *result, BOOL isSuccess) {
-            // 拿到当前的下拉刷新控件，结束刷新状态
-            [weakSelf.mainTableView.mj_header endRefreshing];
-            if (isSuccess) {
-                weakSelf.headerView.model = result.data;
-                weakSelf.headerView.userNameLabel.text = [NSString stringWithFormat:NSLocalizedString(@"***的钱包", nil)];
-                [weakSelf.headerView.avatarImg sd_setImageWithURL:String_To_URL(@"") placeholderImage:[UIImage imageNamed:@"wallet_default_avatar"]];
-//                [weakSelf.mainTableView reloadData];
-            }
-        }] ;
+//        [self.mainService get_account_asset:^(AccountResult *result, BOOL isSuccess) {
+//            // 拿到当前的下拉刷新控件，结束刷新状态
+//            [weakSelf.mainTableView.mj_header endRefreshing];
+//            if (isSuccess) {
+//                weakSelf.headerView.model = result.data;
+//                weakSelf.headerView.userNameLabel.text = [NSString stringWithFormat:NSLocalizedString(@"***的钱包", nil)];
+//                [weakSelf.headerView.avatarImg sd_setImageWithURL:String_To_URL(@"") placeholderImage:[UIImage imageNamed:@"wallet_default_avatar"]];
+////                [weakSelf.mainTableView reloadData];
+//            }
+//        }] ;
     }
 }
 
@@ -270,13 +266,12 @@
 //        if ([weakSelf.model.followType isEqualToNumber:@2]) {
         TransferNewViewController *vc = [[TransferNewViewController alloc] init];
         TransferModel *model = [[TransferModel alloc] init];
-        model.account_name = weakSelf.mainService.getAccountAssetRequest.name;
+        model.account_name = weakSelf.model.displayName;
         if (weakSelf.get_token_info_service.dataSourceArray.count>0) {
             TokenInfo *token = weakSelf.get_token_info_service.dataSourceArray[0];
             model.coin = token.token_symbol;
         }
         vc.transferModel = model;
-        
         vc.get_token_info_service_data_array = weakSelf.get_token_info_service.dataSourceArray;
         [weakSelf.navigationController pushViewController:vc animated:YES];
 //        }
@@ -321,11 +316,7 @@
 
 // navigationViewDelegate
 -(void)leftBtnDidClick{
-    [self.navigationController popToRootViewControllerAnimated:YES];
-}
-
--(UIStatusBarStyle)preferredStatusBarStyle{
-    return UIStatusBarStyleLightContent;
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 -(void)rightBtnDidClick{
@@ -401,12 +392,18 @@
     if (IsNilOrNull(name)) {
         return;
     }
-    self.mainService.getAccountAssetRequest.name = name;
-    [self.mainService get_account_asset:^(AccountResult *result, BOOL isSuccess) {
+    self.headerView.userAccountLabel.text = name;
+    self.get_token_info_service.get_token_info_request.accountName = name;
+    [self.get_token_info_service get_token_info:^(id service, BOOL isSuccess) {
+        // 拿到当前的下拉刷新控件，结束刷新状态
+        [weakSelf.mainTableView.mj_header endRefreshing];
         if (isSuccess) {
-            weakSelf.headerView.model = result.data;
+            //            weakSelf.currentAccountResult = result;
+            //            weakSelf.headerView.model = result.data;
+            [weakSelf.mainTableView reloadData];
+            [weakSelf.headerView updateViewWithDataArray:weakSelf.get_token_info_service.dataSourceArray];
         }
-    }] ;
+    }];
 }
 
 

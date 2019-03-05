@@ -42,7 +42,7 @@
 
 @property(nonatomic, strong) JSContext *context;
 @property(nonatomic, copy) NSString *ref_block_prefix;
-@property(nonatomic, copy) NSString *ref_block_num;
+
 @property(nonatomic , strong) NSData *chain_Id;
 @property(nonatomic, copy) NSString *expiration;
 @property(nonatomic, copy) NSString *required_Publickey;
@@ -156,6 +156,7 @@
     self.getRequiredPublicKeyRequest.account = self.code;
     self.getRequiredPublicKeyRequest.name = self.action;
     self.getRequiredPublicKeyRequest.available_keys = self.available_keys;
+    self.getRequiredPublicKeyRequest.permission = self.permission;
     
     
     WS(weakSelf);

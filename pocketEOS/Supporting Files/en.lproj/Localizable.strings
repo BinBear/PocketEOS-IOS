@@ -37,19 +37,26 @@
 "参考价格"="Reference Price";
 "24小时涨跌幅"="24h change";
 "总市值"="Total Market Value";
+"今日"="Today";
 
 
 /*
  AssestDetailFooterView.m
  */
+"转账"="Send";
+"收款"="Receive";
+"红包"="Red Packets";
+"发红包"="Red Packets";
 "发起转账"="Send";
 "发起收款"="Receive";
 "发送红包"="Red Packets";
+
 
 /*
  AssestsMainViewController.m
  */
 "邀请好友"="Invitation";
+"等待主网确认"="Waiting for mainnet verification";
 
 /*
  AssestsMainHeaderView.m
@@ -57,6 +64,7 @@
 "的钱包"="'s wallet";
 "没有账号"="no accounts";
 "请移步至社交模式"="Go to social mode please";
+"当前账号"="Account";
 
 /*
  AssestsMainTableViewCell.m
@@ -97,7 +105,7 @@
 "天降大红包，没时间解释了，快抢!"="Hurry Up! Get red packet for free!";
 "我下血本送上的区块链红包，无需消费、可以兑现，还犹豫什么？手慢无哦！"="Block chain red packet with large amout! Free and unconditional, Just Get It! Hurry up! ";
 "暂不支持~"="Don't support";
-"继续发送红包"="Send Red Packet to More Friends";
+"继续发红包"="Send Red Packet to More Friends";
 
 /*
  RedPacketViewController.m
@@ -114,6 +122,7 @@
 "请填写资产数量!"="Input amount please!";
 "请填写红包个数!"="Input count please!";
 "转账到eosredpacket成功!"="转账到eosredpacket成功!";
+"红包记录"="RedPacket History";
 
 /*
  RedPacketDetailViewController.m
@@ -126,6 +135,8 @@
 "    红包记录"="    Red Packet History";
 "领取的"="Received";
 "已经存入您的主账号"="Red Packet transferred to your Main Account.";
+"红包已抢完"="Better Luck Next Time";
+"继续发红包"="Send Red Packet to More Friends";
 
 /*
  ChangeAccountViewController.m
@@ -166,13 +177,13 @@
 "钱包名称不能为空!"="wallet name can't be nil!";
 "密码不能为空!"="password can't be nil!";
 "两次输入的密码不一致!"="Password is not consistent.";
-"本地钱包名不可重复!"="local wallet name can't repeat!";
+"该钱包名称已在您本地存在,请更换尝试~!"="local wallet name can't repeat!";
 
 /*
  EOSMappingImportAccountViewController.m
  */
 "映射账号录入"="I have Private Key(s) from EOS mapping.";
-"输入框不能为空!"="input box can't be nil!";
+"请保证输入信息的完整~"="input box can't be nil!";
 "私钥格式有误!"="private key format error!";
 "本地钱包已存在该账号!"="local wallet has this account already!";
 "账号导入成功!"="account import success!";
@@ -214,6 +225,7 @@
 "发出红包"="Send Red Packet";
 "发送给"="To";
 "接受自"="From";
+"来自"="From";
 "所在区块"="Block";
 "成功"="Success";
 
@@ -413,13 +425,13 @@
  */
 "滑动销毁钱包"="Slide to Burn Your Wallet Away";
 "将滑块滑动到右侧指定位置内即可销毁"="Slide to the specific postion and Burn your wallet.";
-"个人设置"="Me";
+"个人中心"="Me";
 "未绑定微信"="WeChat not bind";
 "未绑定QQ"="QQ not bind";
 "已绑定"="bind success";
 "我的相册"="My album";
 "拍照"="Take photo";
-"名字"="Name";
+"修改名字"="Name";
 
 /*
  UnBindSocialPlatformViewController.m
@@ -600,9 +612,11 @@
  PocketManagementTableViewCell.m
  */
 "Active权限"="Active permission";
-"Active权限＋Owner权限"="Owner &amp; Active permission";
+"Active权限＋Owner权限"="Owner & Active permission";
 "当前主账号"="Main account";
 "其他账号"="Normal acocunt";
+"账号详情"="Account Details";
+
 
 /*
  AddAssestsViewController.m
@@ -614,3 +628,228 @@
  CustomAssestsViewController.m
  */
 "自定义管理"="Custom Token";
+
+/*
+ AccountQRCodeManagementViewController.m
+ */
+"复制成功"="copy success";
+"账号二维码"="Account QRCode";
+
+/*
+ ImportOwnerPermisionViewController.m
+ */
+"导入私钥成功"="Import private key success";
+
+/*
+ VipRegistAccountViewController.m
+*/
+"请选择私钥模式"="Choose private key mode please";
+"VIP创建"="VIP Regist";
+
+/*
+ AddAccountViewController.m
+ */
+"添加账号"="Add EOS accout";
+"暂无免费名额，开放时间请留意社区动态"="No quota yet";
+
+/*
+ AddAccountMainService.m
+ */
+"导入账号"="Import accout";
+"创建账号"="Pay for a now account";
+"我是VIP"="Use VIP code to get a new account";
+"限时免费"="Limited time free";
+"使用已有的EOS账号"="Import now!";
+"支付费用创建新EOS账号"="Buy EOS account with alipay or wechat.";
+"填写注册码免费创建EOS账号"="VIP only!";
+"不定期开放，敬请关注"="Open irregular, please keep focus";
+
+/*
+ PayRegistAccountViewController.m
+ */
+"元"="";
+"账号已存在"="Account already exist";
+"警告"="Warning";
+"离开本页面将导致私钥丢失，由此造成的损失将由您自行承担!"="Depart will lose private keys，and yourself should bear the loss !";
+"继续操作"="Stay In";
+"确认离开"="Depart";
+"请先安装微信应用"="Please install WeChat first.";
+
+/*
+ ImportAccountHeaderView.m
+ */
+"输入Owner私钥"="Please input your private key";
+"输入Active私钥"="Please input your private key";
+
+/*
+ ExcuteActionsViewController.m
+ */
+"签名内容"="Signature";
+"签名成功"="Signed";
+"确认签名"="Sign";
+"您钱包中暂无操作账号"="The required account is not in your wallet";
+
+/*
+ ExcuteActionsContentTableViewCell.m
+ */
+"合约名字"="Contract Account";
+"动作"="Action";
+"操作账号"="Signature Account";
+"内容"="Data";
+
+/*
+ BackupAccountHeaderView.m
+ */
+"确认没有被人窥视或拍照打开右侧按钮查看您的私钥"="Make sure your screen is not be peed at or took photo of \nThen you could switch on to see your private key.";
+"我们建议您将私钥用纸笔抄下来，并放在安全且不会被遗忘的地方。您也可以通过复制私钥的方式进行备份，但将私钥存储在电子设备中可能会带来额外的危险，如数据丢失、数据被盗等。"="We recommend writing down your private key and keep it safely. \nYou could copy it anyway，but the eletronic backup may cause additonal risks, like data corruption, hacker and so on.";
+
+/*
+ TransferRecordsViewController.m
+ */
+"转账记录"="Transfer History";
+"收款记录"="Collection history";
+
+
+/*
+ TransferDetailsService.m
+ */
+"发起人"="From";
+"接收人"="To";
+"数量"="Quantity";
+"备注"="Memo";
+"所在区块"="Block Number";
+"区块时间"="Block Time";
+"CPU消耗"="Transfer CPU";
+"net消耗"="Transfer Net";
+
+/*
+ TransferDetailsViewController.m
+ */
+"转账详情"="Transfer Details";
+
+/*
+ Redpacket_new_version
+ */
+"我们正在努力寻找它的价格..."="The price is not found yet...";
+"红包准备中"="In production";
+"发送失败"="Discard by Mainnet";
+"无扣款"="Not debited";
+"已领完"="All opened";
+"收红包"="Get Red Packet";
+"已过期"="Time out";
+"已退回"="Refunded";
+"来自"="From";
+"红包准备中,请耐心等候"="In production, please check later!";
+"发生未知错误,快去联系小秘书!"="Unknown Error, Please check it with OracleChain Community Operator！";
+"红包发送失败"="Fail to send";
+"未被主网确认,款项未扣除"="Discard by Mainnet, not debited";
+"我下血本为您送上"="Envying red packets with ";
+"的大红包，无需消费,直接到达EOS账号,还在犹豫什么?"="no requirements to EOS account, just Open!";
+"未支付"="Unpaid";
+
+"该资产无法取消关注"="Could not remove this token";
+"请关注EOS或者OCT即可发送红包"="Add EOS and OCT before send RedPackets";
+"暂不支持该TOKEN红包"="Don't support this token for redpacket yet";
+
+
+"授权成功"="Authorized!";
+"账户授权"="Account Authorize";
+"金额"="Amount";
+"付款账号"="Payer";
+"收款账号"="Reciever";
+"转账授权"="Transfer Authorize";
+"取消授权"="Cancel Authorizing";
+"失败"="Failed!";
+"授权代表您信任该Dapp，PE不对由此造成的损失负责"="Don't authorize unless you turst the dapp, and PE is liability exemption.";
+"确认授权"="Authorize";
+"密码"="Password";
+"请输入钱包密码"="Set the wallet password";
+"请求授权账户和本地账户不同,请谨慎操作"="Auth account is different form local account, be extremely careful!";
+"请查看所有签名内容后再确认"="Please check all signature informations.";
+"1. 使用免密功能将通过本地缓存为您自动填充密码；\n 2. 退出Dapp后免密功能自动失效，下次需要重新开启；\n 3. PE不会保存您的密码。\n"=" 1. Password-free work with local cache; \n 2. Password-free expired when exit；\n 3. PE will not save your password.";
+"更多任务, 敬请期待"="More tasks coming soon!";
+"最多选取30个节点"="Cloud not vote more than 30 nodes";
+
+"选择您的EOS账号"="Select EOS account";
+"选择您的Token"="Selcet Token";
+"确认即同意第三方Dapp的用户协议与隐私政策"="The Dapp provided by third party. You should agree third party Terms and Private Policy to continue. PE takes no responsibility for this Dapp.";
+"笔交易"="transactions";
+"交易成功，共转出"="Done. Send";
+"交易失败"="Tx failed";
+"归集说明"="note";
+"资产归集"="Collection";
+"交易详情"="Trans Detail";
+"登录中"="Logging...";
+"微信登录"="By Wechat";
+"只有主账号,无法进行资产归集"="Could not collect for you have only one account.";
+"等你领"="waiting for you！";
+"恭喜发财, 大吉大利!"="Best wished!";
+"送上红包"="send red packets!";
+"可用余额不足"="Exceed your balance.";
+
+"抵押管理"="Bandwidth";
+"内存管理"="Ram";
+"账号救援"="Rescue";
+"借用"="Borrow";
+"抵押资源"="Stake";
+"赎回资源"="UnStake";
+"可用"="";
+"买入内存"="Buy";
+"卖出内存"="Sell";
+"输入EOS数量"="Input EOS amount";
+"可用"="Balance";
+"可赎回"="Unstaking";
+"确认抵押"="Confirm";
+"买入数量"="Amount to Buy";
+"卖出数量"="Amount to Sell";
+"输入RAM数量"="Input RAM amount";
+"确认卖出"="Sell";
+"确认买入"="Buy";
+"到浏览器中查看详情"="Open in Browser. ";
+"分享"="Share";
+"分享给好友"="Share";
+"立即升级"="Update now!";
+"关于我们"="About Us";
+
+"1.删除账号后您无法管理该账号、操作其中的资产或使用该账号登录Dapp  \n2.删除账号后，您无法通过PE重新找回该账号  \n3.如果您未备份私钥，删除账号有可能导致您的账号及其中的资产丢失  \n4.删除账号前，请确保您理解删除账号的意义，并已备份私钥"="1.You could not manage this accout and asset wthin it or launch dapp by this accout after block up.  \n2.Acoout COUlD NOT BE RETRIEVE. \n3.You will lose your asset if you have not backup your private keys.  \n4. Continue olny in the case you understand what you are doing and have backups.";
+
+"暂未导入账号"="No accounts.";
+"去添加"="Add account";
+"去设置"="Set Wallet Pwd";
+"添加EOS账号继续操作"="Add accout before continue.";
+"设置钱包密码继续操作"="Wallet Pwd is required to add account.";
+"跳过添加"="Don't add now.";
+"选择添加账号方式"="See assets after adding accounts.";
+"单私钥"="Single key";
+"双私钥"="Daul keys";
+"请分别输入Owner私钥和Active私钥："="Input Owner key and Active key in two boxes：";
+"请选择您想要导入的账号"="Select accounts to import:";
+"下一步"="Next";
+"点击导入"="Click to import";
+"导入成功"="Imported";
+"导入失败"="Fail";
+"本地存在"="Exsited";
+"权限错误"="Key Err";
+"第1组私钥暂未查找到账号"="First key is unused.";
+"第2组私钥暂未查找到账号"="Second key is unused.";
+"两组私钥相同，请选择单私钥导入"="Please use single key mode!";
+"权限错误"="Permission Err!";
+"变更私钥"="Change Key";
+"导入Owner权限"="Import Owner key";
+"导入Active权限"="Import Active key";
+"变更Owner权限"="Change Owner key";
+"变更Active权限"="Change Active key";
+"不知道Active key？去重置"="Forget Active key？Change now. ";
+"变更"="Change";
+"生成密钥"="Create key";
+"生成的私钥"="New key";
+"注意: \n为避免权限变更失败导致账号不可用，变更权限前请备份原私钥；"="Warning: \nIn case of failures, Backup Old Key before any acion.";
+"1.请复制私钥并妥善保存。 \n2.复制私钥后，请返回上一页并手动填入私钥，方可完成重置。 \n3.如果您不理解本页的内容，请立即停止操作，否则您将自行承担损失。"="1.Please Copy your key and store it properly. \n2.Paste new key in private page and change it. \n3.Act with fully understanding or Stop Right Now!";
+"复制私钥"="Copy key";
+"新的公钥"="New public key";
+"您还未导入Owner，无法变更"="Import onwer key before change auth.";
+"请输入新的Active key"="Input new Active key";
+"请输入新的Owner key"="Input new Owner key";
+"请输入私钥："="Please Input Private key";
+"暂无账号"="No account";
+"变更私钥权限成功"="Change Permision Success";

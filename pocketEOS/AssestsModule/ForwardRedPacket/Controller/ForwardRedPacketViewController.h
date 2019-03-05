@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "RedPacketModel.h"
 
+
 @interface ForwardRedPacketViewController : BaseViewController
 @property(nonatomic , strong) RedPacketModel *redPacketModel;
 @end
